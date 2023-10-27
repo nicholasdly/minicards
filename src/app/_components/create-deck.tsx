@@ -2,14 +2,13 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-
 import { api } from "~/trpc/react";
 
-export function CreatePost() {
+export default function CreateDeck() {
   const router = useRouter();
   const [name, setName] = useState("");
 
-  const createPost = api.post.create.useMutation({
+  const createDeck = api.deck.create.useMutation({
     onSuccess: () => {
       router.refresh();
       setName("");
@@ -20,23 +19,23 @@ export function CreatePost() {
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        createPost.mutate({ name });
+        createDeck.mutate({ name });
       }}
-      className="flex flex-col gap-2"
+      className="flex gap-2 mb-4"
     >
       <input
         type="text"
-        placeholder="Title"
+        placeholder="Deck Name"
         value={name}
         onChange={(e) => setName(e.target.value)}
-        className="w-full rounded-full px-4 py-2 text-black"
+        className="outline rounded-lg px-2 py-1"
       />
       <button
         type="submit"
-        className="rounded-full bg-white/10 px-10 py-3 font-semibold transition hover:bg-white/20"
-        disabled={createPost.isLoading}
+        disabled={createDeck.isLoading}
+        className="outline rounded-full px-2 py-1"
       >
-        {createPost.isLoading ? "Submitting..." : "Submit"}
+        {createDeck.isLoading ? "Creating deck..." : "Create"}
       </button>
     </form>
   );

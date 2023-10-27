@@ -1,4 +1,4 @@
-name: Pre-deployment Checks
+name: Pre-deployment checks
 
 on: [push, pull_request]
 

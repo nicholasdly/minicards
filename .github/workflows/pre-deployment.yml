@@ -3,7 +3,11 @@ name: Pre-deployment Checks
 on: [push, pull_request]
 
 env:
-  DATABASE_URL: "https://google.com"  # Any URL will do
+  DATABASE_URL: "https://url.com"
+  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "secret_key"
+  CLERK_SECRET_KEY: "secret_key"
+  UPSTASH_REDIS_REST_URL: "https://url.com"
+  UPSTASH_REDIS_REST_TOKEN: "secret_token"
 
 jobs:
   build:
@@ -21,6 +25,3 @@ jobs:
 
       - name: Lint
         run: npm run lint
-
-      - name: Print environment variable
-        run: echo $MY_ENV_VAR

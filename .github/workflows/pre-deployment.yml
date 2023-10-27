@@ -1,0 +1,26 @@
+name: Pre-deployment Checks
+
+on: [push, pull_request]
+
+env:
+  DATABASE_URL: "https://google.com"  # Any URL will do
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Print environment variable
+        run: echo $MY_ENV_VAR

@@ -4,11 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { api } from "~/trpc/react";
 
-interface CreateDeckProps {
-  userId: string,
-}
-
-export default function CreateDeck({ userId }: CreateDeckProps) {
+export default function CreateDeck() {
   const router = useRouter();
   const [name, setName] = useState("");
 
@@ -23,7 +19,7 @@ export default function CreateDeck({ userId }: CreateDeckProps) {
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        createDeck.mutate({ name, creatorId: userId });
+        createDeck.mutate({ name });
       }}
       className="flex gap-2 mb-4"
     >

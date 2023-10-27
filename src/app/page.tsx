@@ -21,8 +21,8 @@ export default function Home() {
     <>
       <Header />
       <main className="flex flex-col items-center">
-        <CreateDeck userId={userId} />
-        <DeckList userId={userId} />
+        <CreateDeck />
+        <DeckList />
       </main>
     </>
   );

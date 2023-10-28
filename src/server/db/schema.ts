@@ -20,8 +20,12 @@ export const mysqlTable = mysqlTableCreator((name) => `minicards_${name}`);
 
 export const decks = mysqlTable(
   "deck",
+export const decks = mysqlTable(
+  "deck",
   {
     id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
+    name: varchar("name", { length: 100 }),
+    creatorId: varchar("creator_id", { length: 256 }),
     name: varchar("name", { length: 100 }),
     creatorId: varchar("creator_id", { length: 256 }),
     createdAt: timestamp("created_at")

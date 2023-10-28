@@ -7,3 +7,4 @@
 - **Authentication**: [Clerk](https://clerk.com/)
 - **Deployment**: [Vercel](https://vercel.com/)
 - **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+- **Testing**: [Vitest](https://vitest.dev/)

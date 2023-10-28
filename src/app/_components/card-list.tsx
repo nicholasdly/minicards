@@ -5,7 +5,7 @@ interface CardListProps {
 }
 
 export default async function CardList({ deckId }: CardListProps) {
-  const cards = await api.card.getAll.query({ deckId });
+  const cards = await api.card.getDeckCards.query({ deckId });
 
   if (cards.length === 0) {
     return <div>There are no cards in this deck.</div>

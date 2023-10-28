@@ -13,7 +13,7 @@ export default function CreateCard({ deckId }: CreateCardProps) {
   const [front, setFront] = useState("");
   const [back, setBack] = useState("");
 
-  const createCard = api.card.create.useMutation({
+  const createCard = api.card.createCard.useMutation({
     onSuccess: () => {
       router.refresh();
       setFront("");

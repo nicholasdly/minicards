@@ -6,6 +6,9 @@ import { z } from "zod";
 import { createTRPCRouter, privateProcedure } from "~/server/api/trpc";
 import { cards } from "~/server/db/schema";
 
+/**
+ * An Upstash rate limiter that allows 20 requests per 20 seconds.
+ */
 const ratelimit = new Ratelimit({
   redis: Redis.fromEnv(),
   limiter: Ratelimit.slidingWindow(20, "20 s"),
@@ -13,7 +16,11 @@ const ratelimit = new Ratelimit({
 });
 
 export const cardRouter = createTRPCRouter({
-  create: privateProcedure
+
+  /**
+   * Creates a new flashcard given a deck ID and content for the front and back of the flashcard.
+   */
+  createCard: privateProcedure
     .input(z.object({
       deckId: z.number().int().positive().finite(),
       front: z.string().min(1),
@@ -32,7 +39,10 @@ export const cardRouter = createTRPCRouter({
       });
     }),
 
-  getAll: privateProcedure
+  /**
+   * Returns a list of all flashcards belonging to a specified deck.
+   */
+  getDeckCards: privateProcedure
     .input(z.object({
       deckId: z.number().int().positive().finite()
     }))
@@ -41,4 +51,5 @@ export const cardRouter = createTRPCRouter({
         where: (cards, { eq }) => eq(cards.deckId, input.deckId),
       });
     }),
+
 });

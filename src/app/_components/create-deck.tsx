@@ -8,7 +8,7 @@ export default function CreateDeck() {
   const router = useRouter();
   const [name, setName] = useState("");
 
-  const createDeck = api.deck.create.useMutation({
+  const createDeck = api.deck.createDeck.useMutation({
     onSuccess: () => {
       router.refresh();
       setName("");

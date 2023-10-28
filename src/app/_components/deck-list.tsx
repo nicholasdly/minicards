@@ -1,7 +1,7 @@
 import { api } from "~/trpc/server";
 
 export default async function DeckList() {
-  const userDecks = await api.deck.getAll.query();
+  const userDecks = await api.deck.getUserDecks.query();
 
   if (userDecks.length === 0) {
     return <div>You have no decks yet.</div>

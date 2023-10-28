@@ -16,17 +16,6 @@ it("unauthorized user should not be able to create a flashcard", async () => {
   await expect(caller.card.createCard(input)).rejects.toThrowError();
 });
 
-it("unauthorized user should not be able to fetch flashcards in a specified deck", async () => {
-  const ctx = createInnerTRPCContext({ headers: new Headers, userId: null });
-  const caller = appRouter.createCaller(ctx);
-
-  const input: RouterInputs["card"]["getDeckCards"] = {
-    deckId: 1,
-  };
-
-  await expect(caller.card.getDeckCards(input)).rejects.toThrowError();
-});
-
 it("user must provide valid deck ID to create a flashcard", async () => {
   const ctx = createInnerTRPCContext({ headers: new Headers, userId: null });
   const caller = appRouter.createCaller(ctx);

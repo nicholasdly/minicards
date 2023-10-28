@@ -1,18 +1,24 @@
 import { api } from "~/trpc/server";
 
 interface CardListProps {
-  deckId: number,
+  id: number,
 }
 
-export default async function CardList({ deckId }: CardListProps) {
-  const cards = await api.card.getDeckCards.query({ deckId });
+export default async function CardList({ id }: CardListProps) {
+  const deck = await api.deck.getDeck.query({ id });
 
-  if (cards.length === 0) {
+  if (!deck) {
+    return <div>There does not exist a deck with this ID.</div>
+  }
+
+  const cards = deck.cards;
+  if (!cards ||  cards.length === 0) {
     return <div>There are no cards in this deck.</div>
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col items-center gap-4">
+      <p className="text-xl font-bold">{deck.name}</p>
       {cards.map(card => (
         <div key={card.id} className="flex flex-col items-center">
           <p className="font-bold">#{card.id}</p>

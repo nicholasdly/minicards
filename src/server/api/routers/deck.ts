@@ -50,12 +50,28 @@ export const deckRouter = createTRPCRouter({
   /**
    * Returns a list of the 12 most recently created flashcard decks.
    */
-  getAllDecks: privateProcedure
+  getRecentDecks: privateProcedure
     .query(({ ctx }) => {
       return ctx.db.query.decks.findMany({
         limit: 12,
         orderBy: (deck, { desc }) => [desc(deck.createdAt)],
       });
+    }),
+
+  /**
+   * Returns a specified flashcard deck (including its flashcards).
+   */
+  getDeck: privateProcedure
+    .input(z.object({
+      id: z.number().int().positive().finite(),
+    }))
+    .query(({ ctx, input }) => {
+      return ctx.db.query.decks.findFirst({
+        where: (deck, { eq }) => eq(deck.id, input.id),
+        with: {
+          cards: true
+        }
+      })
     }),
 
 });

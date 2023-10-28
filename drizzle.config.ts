@@ -8,5 +8,5 @@ export default {
   dbCredentials: {
     connectionString: env.DATABASE_URL,
   },
-  tablesFilter: ["queso_*"],
+  tablesFilter: ["minicards_*"],
 } satisfies Config;

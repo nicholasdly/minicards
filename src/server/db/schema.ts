@@ -1,7 +1,7 @@
 // Example model schema from the Drizzle docs
 // https://orm.drizzle.team/docs/sql-schema-declaration
 
-import { sql } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
   bigint,
   index,
@@ -16,7 +16,7 @@ import {
  *
  * @see https://orm.drizzle.team/docs/goodies#multi-project-schema
  */
-export const mysqlTable = mysqlTableCreator((name) => `queso_${name}`);
+export const mysqlTable = mysqlTableCreator((name) => `minicards_${name}`);
 
 export const decks = mysqlTable(
   "deck",
@@ -38,7 +38,7 @@ export const cards = mysqlTable(
   "card",
   {
     id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
-    deckId: bigint("deck_id", { mode: "number" }).references(() => decks.id),
+    deckId: bigint("deck_id", { mode: "number" }),
     front: varchar("front", { length: 256 }).notNull(),
     back: varchar("back", { length: 256 }).notNull(),
     createdAt: timestamp("created_at")
@@ -49,3 +49,14 @@ export const cards = mysqlTable(
     deckIndex: index("deck_idx").on(card.deckId),
   })
 );
+
+export const usersRelations = relations(decks, ({ many }) => ({
+  cards: many(cards)
+}));
+
+export const blocksRelations = relations(cards, ({ one }) => ({
+  deck: one(decks, {
+    fields: [cards.deckId],
+    references: [decks.id]
+  })
+}));

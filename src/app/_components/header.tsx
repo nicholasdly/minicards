@@ -8,7 +8,7 @@ export default function Header() {
       {userId
         ? <SignOutButton />
         : <SignInButton redirectUrl="/" />}
-      <h1 className="text-6xl font-medium mb-6">queso</h1>
+      <h1 className="text-6xl font-medium mb-6">minicards</h1>
     </header>
   )
 }

@@ -39,17 +39,4 @@ export const cardRouter = createTRPCRouter({
       });
     }),
 
-  /**
-   * Returns a list of all flashcards belonging to a specified deck.
-   */
-  getDeckCards: privateProcedure
-    .input(z.object({
-      deckId: z.number().int().positive().finite()
-    }))
-    .query(({ ctx, input }) => {
-      return ctx.db.query.cards.findMany({
-        where: (cards, { eq }) => eq(cards.deckId, input.deckId),
-      });
-    }),
-
 });

@@ -12,9 +12,9 @@ const inter = Inter({
 });
 
 export const metadata = {
-  title: "Queso - flashcards simplified",
-  description: "Queso is a free and open-source flashcard application.",
-  icons: [{ rel: "icon", url: "/favicon.ico" }],
+  title: "minicards - online flashcards simplified",
+  description: "Make remembering things easy with minicards, a free and open source flashcard web application.",
+  icons: [{ rel: "icon", url: "/favicon.svg" }],
 };
 
 export default function RootLayout({

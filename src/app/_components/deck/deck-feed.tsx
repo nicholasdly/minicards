@@ -8,7 +8,9 @@ export default async function DeckFeed() {
   return (
     <div className="flex flex-col px-16 gap-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-medium">Your Decks</h1>
+        <h1 className="text-xl font-medium">
+          {decks.length > 0 ? "Your Decks" : "You have no flashcard decks!"}
+        </h1>
         <CreateDeckButton />
       </div>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 ">

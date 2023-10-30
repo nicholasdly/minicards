@@ -16,7 +16,9 @@ interface FlashcardProps {
 export default function DeckDisplay({ cards }: DeckDisplayProps) {
   return (
     <div className="stack">
-      {cards.map(card => <Flashcard key={card.id} front={card.front} back={card.back} />)}
+      {cards.length > 0
+        ? cards.map(card => <Flashcard key={card.id} front={card.front} back={card.back} />)
+        : <Flashcard front="This deck is empty!" back="Hello world!" />}
     </div>
   );
 }

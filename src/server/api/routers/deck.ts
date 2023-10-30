@@ -23,6 +23,7 @@ export const deckRouter = createTRPCRouter({
   createDeck: privateProcedure
     .input(z.object({
       name: z.string().min(1),
+      description: z.string().min(1),
     }))
     .mutation(async ({ ctx, input }) => {
       const creatorId = ctx.userId;
@@ -32,6 +33,7 @@ export const deckRouter = createTRPCRouter({
 
       await ctx.db.insert(decks).values({
         name: input.name,
+        description: input.description,
         creatorId
       });
     }),
@@ -44,16 +46,6 @@ export const deckRouter = createTRPCRouter({
       const userId = ctx.userId;
       return ctx.db.query.decks.findMany({
         where: (decks, { eq }) => eq(decks.creatorId, userId),
-      });
-    }),
-
-  /**
-   * Returns a list of the 12 most recently created flashcard decks.
-   */
-  getRecentDecks: privateProcedure
-    .query(({ ctx }) => {
-      return ctx.db.query.decks.findMany({
-        limit: 12,
         orderBy: (deck, { desc }) => [desc(deck.createdAt)],
       });
     }),

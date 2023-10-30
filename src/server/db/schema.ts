@@ -23,6 +23,7 @@ export const decks = mysqlTable(
   {
     id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
     name: varchar("name", { length: 100 }),
+    description: varchar("description", { length: 256 }),
     creatorId: varchar("creator_id", { length: 256 }),
     createdAt: timestamp("created_at")
       .default(sql`CURRENT_TIMESTAMP`)

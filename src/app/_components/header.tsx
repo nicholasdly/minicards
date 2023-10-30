@@ -1,14 +1,27 @@
-import { SignInButton, SignOutButton, auth } from "@clerk/nextjs";
+import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import Link from "next/link";
 
 export default function Header() {
-  const { userId } = auth();
-  
   return (
-    <header className="flex flex-col items-center mt-16">
-      {userId
-        ? <SignOutButton />
-        : <SignInButton redirectUrl="/" />}
-      <h1 className="text-6xl font-medium mb-6">minicards</h1>
+    <header className="flex items-center gap-3 px-5 py-5 border-b">
+      <div className="flex-1 flex items-baseline gap-2">
+        <Link href="/" className="text-3xl font-semibold">minicards</Link>
+        <span className="text-sm">by Nicholas Ly</span>
+      </div>
+      <div className="flex-none">
+        <SignedIn>
+          <UserButton
+            showName={true}
+            signInUrl="/"
+            afterSignOutUrl="/"
+          />
+        </SignedIn>
+        <SignedOut>
+          <SignInButton>
+            <button className="btn btn-ghost btn-sm normal-case">log in or sign up</button>
+          </SignInButton>
+        </SignedOut>
+      </div>
     </header>
   )
 }

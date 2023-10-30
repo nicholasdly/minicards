@@ -1,29 +1,33 @@
-import CreateDeck from "./_components/create-deck";
-import DeckList from "./_components/deck-list";
-import { auth } from "@clerk/nextjs";
-import Header from "./_components/header";
+import DeckFeed from "./_components/deck/deck-feed";
+import { CreateDeckModal } from "./_components/deck/deck-create";
+import { SignedIn, SignedOut } from "@clerk/nextjs";
 
-export default function Home() {
-  const { userId } = auth();
-
-  if (!userId) {
-    return (
-      <>
-        <Header />
-        <main className="flex flex-col items-center justify-center">
-          Please log in to create decks and flashcards.
-        </main>
-      </>
-    )
-  }
-
+export default function Page() {
   return (
     <>
-      <Header />
-      <main className="flex flex-col items-center">
-        <CreateDeck />
-        <DeckList />
-      </main>
+      <SignedOutPage />
+      <SignedInPage />
     </>
+  )
+}
+
+function SignedInPage() {
+  return (
+    <SignedIn>
+      <main className="mt-8">
+        <DeckFeed />
+        <CreateDeckModal />
+      </main>
+    </SignedIn>
+  );
+}
+
+function SignedOutPage() {
+  return (
+    <SignedOut>
+      <main className="flex justify-center mt-32 font-bold">
+        This is an incomplete project.
+      </main>
+    </SignedOut>
   );
 }

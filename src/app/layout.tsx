@@ -4,7 +4,10 @@ import { Inter } from "next/font/google";
 import { headers } from "next/headers";
 
 import { TRPCReactProvider } from "~/trpc/react";
-import { ClerkProvider } from "@clerk/nextjs";
+import { ClerkLoaded, ClerkLoading, ClerkProvider } from "@clerk/nextjs";
+import LoadingScreen from "./_components/loading";
+import Header from "./_components/header";
+import { Toaster } from "react-hot-toast";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -12,9 +15,9 @@ const inter = Inter({
 });
 
 export const metadata = {
-  title: "Queso - flashcards simplified",
-  description: "Queso is a free and open-source flashcard application.",
-  icons: [{ rel: "icon", url: "/favicon.ico" }],
+  title: "minicards - online flashcards simplified",
+  description: "Make remembering things easy with minicards, a free and open source flashcard web application.",
+  icons: [{ rel: "icon", url: "/favicon.svg" }],
 };
 
 export default function RootLayout({
@@ -25,9 +28,18 @@ export default function RootLayout({
   return (
     <html lang="en">
       <ClerkProvider>
-        <body className={`font-sans ${inter.variable}`}>
-          <TRPCReactProvider headers={headers()}>{children}</TRPCReactProvider>
-        </body>
+          <body className={`font-sans ${inter.variable}`}>
+            <TRPCReactProvider headers={headers()}>
+              <ClerkLoading>
+                <LoadingScreen />
+              </ClerkLoading>
+              <ClerkLoaded>
+                <Header />
+                {children}
+              </ClerkLoaded>
+              <Toaster position="bottom-center" />
+            </TRPCReactProvider>
+          </body>
       </ClerkProvider>
     </html>
   );

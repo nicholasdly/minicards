@@ -1,4 +1,4 @@
-name: Pre-deployment checks
+name: Deployment checks
 
 on: [push, pull_request]
 
@@ -25,3 +25,6 @@ jobs:
 
       - name: Lint
         run: npm run lint
+
+      - name: Integration tests
+        run: npm run test

@@ -14,7 +14,7 @@ export default function Page() {
 function SignedInPage() {
   return (
     <SignedIn>
-      <main>
+      <main className="mt-8">
         <DeckFeed />
         <CreateDeckModal />
       </main>
@@ -26,7 +26,7 @@ function SignedOutPage() {
   return (
     <SignedOut>
       <main className="flex justify-center mt-32 font-bold">
-        Hello world!
+        This is an incomplete project.
       </main>
     </SignedOut>
   );

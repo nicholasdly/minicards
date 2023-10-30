@@ -22,7 +22,7 @@ export const deckRouter = createTRPCRouter({
    */
   createDeck: privateProcedure
     .input(z.object({
-      name: z.string().min(1),
+      title: z.string().min(1),
       description: z.string().min(1),
     }))
     .mutation(async ({ ctx, input }) => {
@@ -32,7 +32,7 @@ export const deckRouter = createTRPCRouter({
       if (!success) throw new TRPCError({ code: "TOO_MANY_REQUESTS" });
 
       await ctx.db.insert(decks).values({
-        name: input.name,
+        title: input.title,
         description: input.description,
         creatorId
       });

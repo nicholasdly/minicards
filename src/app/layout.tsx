@@ -7,6 +7,7 @@ import { TRPCReactProvider } from "~/trpc/react";
 import { ClerkLoaded, ClerkLoading, ClerkProvider } from "@clerk/nextjs";
 import LoadingScreen from "./_components/loading";
 import Header from "./_components/header";
+import { Toaster } from "react-hot-toast";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -36,6 +37,7 @@ export default function RootLayout({
                 <Header />
                 {children}
               </ClerkLoaded>
+              <Toaster position="bottom-center" />
             </TRPCReactProvider>
           </body>
       </ClerkProvider>

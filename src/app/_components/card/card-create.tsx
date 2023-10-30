@@ -5,72 +5,77 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { api } from "~/trpc/react";
 
-export function CreateDeckButton() {
+interface CreateCardModalProps {
+  deckId: number;
+}
+
+export function CreateCardButton() {
   return (
     <button
       className="btn normal-case"
       onClick={() => {
-        (document.getElementById('create-deck-modal') as HTMLDialogElement).showModal();
+        (document.getElementById('create-card-modal') as HTMLDialogElement).showModal();
       }}
     >
-      <span className="font-medium">Create new deck</span>
+      <span className="font-medium">Create new card</span>
     </button>
   );
 }
 
-export function CreateDeckModal() {
+export function CreateCardModal({ deckId }: CreateCardModalProps) {
   const router = useRouter();
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
+  const [front, setFront] = useState("");
+  const [back, setBack] = useState("");
 
-  const createDeck = api.deck.createDeck.useMutation({
+  const createCard = api.card.createCard.useMutation({
     onSuccess: () => {
       router.refresh();
-      setTitle("");
-      setDescription("");
-      (document.getElementById('create-deck-modal') as HTMLDialogElement).close();
-      toast.success("Successfully created deck!");
+      setFront("");
+      setBack("");
+      (document.getElementById('create-card-modal') as HTMLDialogElement).close();
+      toast.success("Successfully created card!");
     },
     onError: (error) => {
       const message = error.data?.zodError?.fieldErrors.content;
+      console.log(message);
       toast.error(message?.[0] ? message[0] : "Something went wrong!");
     },
   });
   
   return (
-    <dialog id="create-deck-modal" className="modal">
+    <dialog id="create-card-modal" className="modal">
       <div className="modal-box items-center justify-center">
         <form method="dialog">
           <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
         </form>
-        <h3 className="font-bold text-lg mb-3">Create a new deck</h3>
+        <h3 className="font-bold text-lg mb-3">Create a new card</h3>
         <form
           className="flex flex-col items-center gap-3"
           onSubmit={(e) => {
             e.preventDefault();
-            createDeck.mutate({ title, description });
+            createCard.mutate({ deckId, front, back });
           }}
         >
           <input
             type="text"
-            placeholder="Title"
+            placeholder="Front of card"
             className="input input-bordered w-full"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            value={front}
+            onChange={(e) => setFront(e.target.value)}
           />
           <input
             type="text"
-            placeholder="Description"
+            placeholder="Back of card"
             className="input input-bordered w-full"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            value={back}
+            onChange={(e) => setBack(e.target.value)}
           />
           <button
             type="submit"
-            disabled={createDeck.isLoading}
+            disabled={createCard.isLoading}
             className="btn normal-case w-full"
           >
-            {createDeck.isLoading ? <span className="loading loading-dots loading-sm" /> : "Create"}
+            {createCard.isLoading ? <span className="loading loading-dots loading-sm" /> : "Create"}
           </button>
         </form>
       </div>

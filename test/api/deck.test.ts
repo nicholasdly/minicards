@@ -9,12 +9,13 @@ it("unauthorized user should not be able to create a deck", async () => {
 
   const input: RouterInputs["deck"]["createDeck"] = {
     name: "test deck name",
+    description: "test deck description",
   };
 
   await expect(caller.deck.createDeck(input)).rejects.toThrowError();
 });
 
-it("unauthorized user should not be able to fetch a user deck collection", async () => {
+it("unauthorized user should not be able to fetch a user's deck collection", async () => {
   const ctx = createInnerTRPCContext({ headers: new Headers, userId: null });
   const caller = appRouter.createCaller(ctx);
 
@@ -27,7 +28,20 @@ it("user must provide a valid deck name to create a deck", async () => {
 
   const input: RouterInputs["deck"]["createDeck"] = {
     name: "",
+    description: "test deck description",
   };
 
+  await expect(caller.deck.createDeck(input)).rejects.toThrowError();
+});
+
+it("user must provide a valid deck description to create a deck", async () => {
+  const ctx = createInnerTRPCContext({ headers: new Headers, userId: null });
+  const caller = appRouter.createCaller(ctx);
+
+  const input: RouterInputs["deck"]["createDeck"] = {
+    name: "test deck name",
+    description: "",
+  };
+  
   await expect(caller.deck.createDeck(input)).rejects.toThrowError();
 });

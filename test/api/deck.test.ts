@@ -8,7 +8,7 @@ it("unauthorized user should not be able to create a deck", async () => {
   const caller = appRouter.createCaller(ctx);
 
   const input: RouterInputs["deck"]["createDeck"] = {
-    name: "test deck name",
+    title: "test deck title",
     description: "test deck description",
   };
 
@@ -27,7 +27,7 @@ it("user must provide a valid deck name to create a deck", async () => {
   const caller = appRouter.createCaller(ctx);
 
   const input: RouterInputs["deck"]["createDeck"] = {
-    name: "",
+    title: "",
     description: "test deck description",
   };
 
@@ -39,7 +39,7 @@ it("user must provide a valid deck description to create a deck", async () => {
   const caller = appRouter.createCaller(ctx);
 
   const input: RouterInputs["deck"]["createDeck"] = {
-    name: "test deck name",
+    title: "test deck title",
     description: "",
   };
   

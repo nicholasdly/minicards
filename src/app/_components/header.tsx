@@ -6,7 +6,12 @@ export default function Header() {
     <header className="flex items-center gap-3 px-5 py-5 border-b">
       <div className="flex-1 flex items-baseline gap-2">
         <Link href="/" className="text-3xl font-semibold">minicards</Link>
-        <span className="text-sm">by Nicholas Ly</span>
+        <span className="text-sm">
+          by&nbsp;
+          <Link href="https://www.nicholasly.com/" target="_blank" prefetch={false}>
+            Nicholas Ly
+          </Link>
+        </span>
       </div>
       <div className="flex-none">
         <SignedIn>

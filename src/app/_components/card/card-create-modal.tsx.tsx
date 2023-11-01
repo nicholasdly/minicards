@@ -8,20 +8,6 @@ interface CreateCardModalProps {
   deckId: number;
 }
 
-export function CreateCardButton() {
-  return (
-    <button
-      className="btn normal-case"
-      onClick={() => {
-        (document.getElementById('create-card-modal') as HTMLDialogElement).showModal();
-        (document.getElementById('create-card-modal-front-input') as HTMLInputElement).focus();
-      }}
-    >
-      <span className="font-medium">Create new card</span>
-    </button>
-  );
-}
-
 export function CreateCardModal({ deckId }: CreateCardModalProps) {
   const utils = api.useUtils();
   const [front, setFront] = useState("");
@@ -31,7 +17,7 @@ export function CreateCardModal({ deckId }: CreateCardModalProps) {
     onSuccess: () => {
       setFront("");
       setBack("");
-      void utils.deck.getDeck.invalidate({ id: deckId });
+      void utils.deck.get.invalidate({ id: deckId });
       toast.success("Successfully created card!");
       (document.getElementById('create-card-modal-front-input') as HTMLInputElement).focus();
     },

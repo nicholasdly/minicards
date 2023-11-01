@@ -1,9 +1,9 @@
 import { api } from "~/trpc/server";
-import { CreateDeckButton } from "./deck-create";
+import { CreateDeckButton } from "./deck-create-button";
 import Link from "next/link";
 
 export default async function DeckFeed() {
-  const decks = await api.deck.getUserDecks.query();
+  const decks = await api.deck.getAll.query();
   
   return (
     <div className="flex flex-col px-16 gap-4">

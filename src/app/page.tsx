@@ -1,5 +1,5 @@
 import DeckFeed from "./_components/deck/deck-feed";
-import { CreateDeckModal } from "./_components/deck/deck-create";
+import { CreateDeckModal } from "./_components/deck/deck-create-modal";
 import { SignedIn, SignedOut } from "@clerk/nextjs";
 
 export default function Page() {

@@ -5,25 +5,12 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { api } from "~/trpc/react";
 
-export function CreateDeckButton() {
-  return (
-    <button
-      className="btn normal-case"
-      onClick={() => {
-        (document.getElementById('create-deck-modal') as HTMLDialogElement).showModal();
-      }}
-    >
-      <span className="font-medium">Create new deck</span>
-    </button>
-  );
-}
-
 export function CreateDeckModal() {
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
 
-  const createDeck = api.deck.createDeck.useMutation({
+  const createDeck = api.deck.create.useMutation({
     onSuccess: () => {
       router.refresh();
       setTitle("");
@@ -32,8 +19,9 @@ export function CreateDeckModal() {
       toast.success("Successfully created deck!");
     },
     onError: (error) => {
-      const message = error.data?.zodError?.fieldErrors.content;
-      toast.error(message?.[0] ? message[0] : "Something went wrong!");
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      const message = JSON.parse(error.message)[0].message as string;
+      toast.error(message ? message : "Something went wrong!");
     },
   });
   
@@ -52,6 +40,7 @@ export function CreateDeckModal() {
           }}
         >
           <input
+            id="create-deck-modal-title-input"
             type="text"
             placeholder="Title"
             className="input input-bordered w-full"

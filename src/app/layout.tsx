@@ -1,6 +1,6 @@
 import "~/styles/globals.css";
 
-import { Inter } from "next/font/google";
+import { GeistSans } from 'geist/font'
 import { headers } from "next/headers";
 
 import { TRPCReactProvider } from "~/trpc/react";
@@ -8,11 +8,6 @@ import { ClerkLoaded, ClerkLoading, ClerkProvider } from "@clerk/nextjs";
 import LoadingScreen from "./_components/loading";
 import Header from "./_components/header";
 import { Toaster } from "react-hot-toast";
-
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-sans",
-});
 
 export const metadata = {
   title: "minicards - online flashcards simplified",
@@ -26,9 +21,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" className={GeistSans.className}>
       <ClerkProvider>
-          <body className={`font-sans ${inter.variable}`}>
+          <body>
             <TRPCReactProvider headers={headers()}>
               <ClerkLoading>
                 <LoadingScreen />

@@ -25,6 +25,7 @@
     "@upstash/ratelimit": "^0.4.4",
     "dayjs": "^1.11.10",
     "drizzle-orm": "^0.28.5",
+    "geist": "^1.0.0",
     "next": "^13.5.4",
     "react": "18.2.0",
     "react-dom": "18.2.0",

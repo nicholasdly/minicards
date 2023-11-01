@@ -23,10 +23,10 @@ export default function DeckDisplay({ cards }: DeckDisplayProps) {
   );
 }
 
-function Flashcard({ front }: FlashcardProps) {
+function Flashcard({ front, back }: FlashcardProps) {
   return (
-    <div className="swap-off bg-base-200 h-96 flex justify-center items-center rounded-3xl p-10 outline">
-      <p className="text-3xl line-clamp-[8]">{front}</p>
+    <div className="bg-base-200 h-96 flex flex-col justify-center items-center rounded-3xl p-10 outline-dotted overflow-hidden">
+      <p className="text-2xl line-clamp-[8]">{front}; {back}</p>
     </div>
   );
 }

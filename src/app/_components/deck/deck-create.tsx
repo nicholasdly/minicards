@@ -32,8 +32,9 @@ export function CreateDeckModal() {
       toast.success("Successfully created deck!");
     },
     onError: (error) => {
-      const message = error.data?.zodError?.fieldErrors.content;
-      toast.error(message?.[0] ? message[0] : "Something went wrong!");
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      const message = JSON.parse(error.message)[0].message as string;
+      toast.error(message ? message : "Something went wrong!");
     },
   });
   

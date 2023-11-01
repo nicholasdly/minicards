@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { api } from "~/trpc/react";
@@ -15,6 +14,7 @@ export function CreateCardButton() {
       className="btn normal-case"
       onClick={() => {
         (document.getElementById('create-card-modal') as HTMLDialogElement).showModal();
+        (document.getElementById('create-card-modal-front-input') as HTMLInputElement).focus();
       }}
     >
       <span className="font-medium">Create new card</span>
@@ -23,22 +23,22 @@ export function CreateCardButton() {
 }
 
 export function CreateCardModal({ deckId }: CreateCardModalProps) {
-  const router = useRouter();
+  const utils = api.useUtils();
   const [front, setFront] = useState("");
   const [back, setBack] = useState("");
 
   const createCard = api.card.createCard.useMutation({
     onSuccess: () => {
-      router.refresh();
       setFront("");
       setBack("");
-      (document.getElementById('create-card-modal') as HTMLDialogElement).close();
+      void utils.deck.getDeck.invalidate({ id: deckId });
       toast.success("Successfully created card!");
+      (document.getElementById('create-card-modal-front-input') as HTMLInputElement).focus();
     },
     onError: (error) => {
-      const message = error.data?.zodError?.fieldErrors.content;
-      console.log(message);
-      toast.error(message?.[0] ? message[0] : "Something went wrong!");
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      const message = JSON.parse(error.message)[0].message as string;
+      toast.error(message ? message : "Something went wrong!");
     },
   });
   
@@ -57,6 +57,7 @@ export function CreateCardModal({ deckId }: CreateCardModalProps) {
           }}
         >
           <input
+            id="create-card-modal-front-input"
             type="text"
             placeholder="Front of card"
             className="input input-bordered w-full"

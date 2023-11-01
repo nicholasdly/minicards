@@ -22,8 +22,14 @@ export const deckRouter = createTRPCRouter({
    */
   createDeck: privateProcedure
     .input(z.object({
-      title: z.string().min(1),
-      description: z.string().min(1),
+      title: z
+        .string()
+        .min(1, { message: "A deck must have a title!" })
+        .max(24, { message: "Your deck title can't be longer than 24 characters!" }),
+      description: z
+        .string()
+        .min(1, { message: "A deck must have a description!" })
+        .max(175, { message: "Your deck description can't be longer than 175 characters!" }),
     }))
     .mutation(async ({ ctx, input }) => {
       const creatorId = ctx.userId;

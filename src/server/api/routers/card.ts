@@ -23,8 +23,14 @@ export const cardRouter = createTRPCRouter({
   createCard: privateProcedure
     .input(z.object({
       deckId: z.number().int().positive().finite(),
-      front: z.string().min(1),
-      back: z.string().min(1),
+      front: z
+        .string()
+        .min(1, { message: "A flashcard must have content for the front!" })
+        .max(256, { message: "The front of your flashcard is too long!" }),
+      back: z
+        .string()
+        .min(1, { message: "A flashcard must have content for the back!" })
+        .max(256, { message: "The back of your flashcard is too long!" }),
     }))
     .mutation(async ({ ctx, input }) => {
       const creatorId = ctx.userId;

@@ -18,7 +18,7 @@ export default function CardFeed({ deckId }: CardFeedProps) {
   if (!deck.data) return <div>A deck of the provided ID does not exist.</div>
 
   return (
-    <div id="card-feed" className="flex flex-col w-full max-w-2xl">
+    <div className="flex flex-col w-full max-w-2xl">
       <div className="flex justify-between">
         <div className="flex flex-col">
           <h1 className="text-xl font-medium">{deck.data.title}</h1>

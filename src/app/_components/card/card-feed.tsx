@@ -25,7 +25,7 @@ export default function CardFeed({ deckId }: CardFeedProps) {
           <span className="text-sm">Created on {dayjs(deck.data.createdAt).format("MMMM D, YYYY")}</span>
           <div className="badge badge-ghost rounded-full mt-1">{deck.data.cards.length} cards</div>
         </div>
-        <div className="flex items-center gap-1">
+        <div className="items-center">
           <CreateCardButton />
           <CardOptionsDropdown />
         </div>
@@ -36,6 +36,27 @@ export default function CardFeed({ deckId }: CardFeedProps) {
         <p>Press <kbd className="kbd kbd-sm">Space</kbd> to flip the flashcard.</p>
         <p>Press <kbd className="kbd kbd-sm">▶︎</kbd> to go to the next flashcard.</p>
         <p>Press <kbd className="kbd kbd-sm">◀︎</kbd> to go to the previous flashcard.</p>
+      </div>
+      <div className="divider mt-10" />
+      <div className={`overflow-x-auto ${deck.data.cards.length === 0 ? 'hidden' : 'block'}`}>
+        <table className="table">
+          <thead>
+            <tr>
+              <th></th>
+              <th>Front</th>
+              <th>Back</th>
+            </tr>
+          </thead>
+          <tbody>
+            {deck.data.cards.map((card, index) => (
+              <tr key={card.id}>
+                <th>{index + 1}</th>
+                <td>{card.front}</td>
+                <td>{card.back}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );

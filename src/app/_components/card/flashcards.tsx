@@ -1,4 +1,9 @@
+"use client";
+
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
+import { api } from "~/trpc/react";
+import { GarbageIcon } from "../icons";
 
 interface FlashcardsProps {
   cards: {
@@ -15,8 +20,23 @@ interface FlashcardsProps {
 const inputTags = ["INPUT", "SELECT", "BUTTON", "TEXTAREA"];
 
 export default function Flashcards({ cards }: FlashcardsProps) {
+  const utils = api.useUtils();
   const [flipped, setFlipped] = useState(false);
   const [index, setIndex] = useState(0);
+
+  const deleteCard = api.card.delete.useMutation({
+    onSuccess: () => {
+      void utils.deck.get.invalidate();
+      setFlipped(!flipped);
+      setIndex(index <= 0 ? 0 : index - 1);
+      toast.success("Successfully deleted front of card!");
+    },
+    onError: (error) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      const message = JSON.parse(error.message)[0].message as string;
+      toast.error(message ? message : "Something went wrong!");
+    },
+  })
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -62,6 +82,15 @@ export default function Flashcards({ cards }: FlashcardsProps) {
         </div>
         <div className="absolute top-5 right-5">
           {index + 1}/{cards.length}
+        </div>
+        <div
+          className="absolute bottom-5 right-5 hover:text-neutral-400 hover:cursor-pointer rounded-full"
+          onClick={() => {
+            const card = cards[index];
+            if (card?.id) deleteCard.mutate({ id: card.id });
+          }}
+        >
+          <GarbageIcon />
         </div>
       </div>
     </>

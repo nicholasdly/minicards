@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
+import { eq } from "drizzle-orm";
 import { z } from "zod";
 
 import { createTRPCRouter, privateProcedure } from "~/server/api/trpc";
@@ -44,5 +45,21 @@ export const cardRouter = createTRPCRouter({
         back: input.back,
       });
     }),
+
+    /**
+     * Delete a specified flashcard.
+     */
+    delete: privateProcedure
+      .input(z.object({
+        id: z.number().int().positive().finite(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const creatorId = ctx.userId;
+
+        const { success } = await ratelimit.limit(creatorId);
+        if (!success) throw new TRPCError({ code: "TOO_MANY_REQUESTS" });
+
+        await ctx.db.delete(cards).where(eq(cards.id, input.id));
+      }),
 
 });

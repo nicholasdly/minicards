@@ -1,7 +1,7 @@
 export default function DeckOptionsDropdown() {
   return (
     <div className="dropdown dropdown-bottom dropdown-end dropdown-hover">
-      <label tabIndex={0} className="btn m-1 normal-case">Edit deck</label>
+      <label tabIndex={0} className="btn m-1 normal-case whitespace-nowrap">Edit deck</label>
       <ul tabIndex={0} className="dropdown-content z-10 menu p-2 shadow bg-base-100 rounded-box w-52">
         <li>
           <a

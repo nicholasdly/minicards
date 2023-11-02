@@ -52,12 +52,12 @@ export default function Flashcards({ cards }: FlashcardsProps) {
       <div className="relative">
         <div className={`w-full ${flipped ? 'opacity-0' : 'opacity-100'}`}>
           <div className="bg-base-100 h-96 flex justify-center items-center rounded-3xl p-10 outline">
-            <p className="text-2xl line-clamp-[8]">{cards[index]?.front}</p>
+            <p className="text-xl">{cards[index]?.front}</p>
           </div>
         </div>
         <div className={`w-full ${flipped ? 'opacity-100' : 'opacity-0'} absolute top-0 left-0`}>
           <div className="bg-base-300 h-96 flex justify-center items-center rounded-3xl p-10 outline">
-            <p className="text-2xl line-clamp-[8]">{cards[index]?.back}</p>
+            <p className="text-xl">{cards[index]?.back}</p>
           </div>
         </div>
         <div className="absolute top-5 right-5">

@@ -19,13 +19,13 @@ export default function CardFeed({ deckId }: CardFeedProps) {
 
   return (
     <div className="flex flex-col w-full max-w-2xl">
-      <div className="flex justify-between">
+      <div className="flex justify-between gap-3">
         <div className="flex flex-col">
           <h1 className="text-xl font-medium">{deck.data.title}</h1>
           <span className="text-sm">Created on {dayjs(deck.data.createdAt).format("MMMM D, YYYY")}</span>
           <div className="badge badge-ghost rounded-full mt-1">{deck.data.cards.length} cards</div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           <CreateCardButton />
           <CardOptionsDropdown />
         </div>

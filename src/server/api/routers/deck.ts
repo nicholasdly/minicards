@@ -26,11 +26,11 @@ export const deckRouter = createTRPCRouter({
       title: z
         .string()
         .min(1, { message: "A deck must have a title!" })
-        .max(24, { message: "Your deck title can't be longer than 24 characters!" }),
+        .max(75, { message: "Your deck title can't exceed 75 characters!" }),
       description: z
         .string()
         .min(1, { message: "A deck must have a description!" })
-        .max(175, { message: "Your deck description can't be longer than 175 characters!" }),
+        .max(300, { message: "Your deck description can't exceed 300 characters!" }),
     }))
     .mutation(async ({ ctx, input }) => {
       const creatorId = ctx.userId;
@@ -82,7 +82,7 @@ export const deckRouter = createTRPCRouter({
       title: z
         .string()
         .min(1, { message: "A deck must have a title!" })
-        .max(24, { message: "Your deck title can't be longer than 24 characters!" }),
+        .max(75, { message: "Your deck title can't exceed 75 characters!" }),
     }))
     .mutation(async ({ ctx, input }) => {
       const creatorId = ctx.userId;
@@ -104,7 +104,7 @@ export const deckRouter = createTRPCRouter({
         description: z
         .string()
         .min(1, { message: "A deck must have a description!" })
-        .max(175, { message: "Your deck description can't be longer than 175 characters!" }),
+        .max(300, { message: "Your deck description can't exceed 300 characters!" }),
       }))
       .mutation(async ({ ctx, input }) => {
         const creatorId = ctx.userId;

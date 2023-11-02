@@ -18,16 +18,16 @@ export default async function DeckFeed() {
           <Link
             key={deck.id}
             href={`/deck/${deck.id}`}
-            className="card bg-base-200 hover:bg-base-300 transition transition-300 h-64"
+            className="card bg-base-200 hover:bg-base-300 transition transition-300"
           >
             <div className="card-body">
-              <h2 className="card-title line-clamp-1">{deck.title}</h2>
+              <h2 className="card-title">{deck.title}</h2>
               <div>
                 {/*
                   Having a line clamped element inside of an element of fixed height causes the line clamping to not
                   work as expected. Placing the below element inside of a div fixes this.
                 */}
-                <p className="line-clamp-4">{deck.description}</p>
+                <p>{deck.description}</p>
               </div>
             </div>
           </Link>

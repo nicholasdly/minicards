@@ -42,7 +42,8 @@ export default function Flashcards({ cards }: FlashcardsProps) {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Makes sure that the user isn't attempting to do anything other than flip the flashcard.
       if (!document.activeElement || inputTags.includes(document.activeElement.tagName)) return;
-
+      
+      e.preventDefault();
       if (e.key === " ") {
         setFlipped(!flipped);
       } else if (e.key === "ArrowLeft") {

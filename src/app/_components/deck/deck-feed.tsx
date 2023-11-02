@@ -6,7 +6,7 @@ export default async function DeckFeed() {
   const decks = await api.deck.getAll.query();
   
   return (
-    <div className="flex flex-col px-16 gap-4">
+    <div className="flex flex-col px-5 lg:px-16 gap-4">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-medium">
           {decks.length > 0 ? "Your Decks" : "You have no flashcard decks!"}

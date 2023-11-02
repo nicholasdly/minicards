@@ -12,7 +12,7 @@ export default function Page({ params }: PageProps) {
   const deckId = Number(params.deckId);
 
   return (
-    <main className="flex justify-center my-8">
+    <main className="flex justify-center px-5 my-5 lg:my-8">
       <CardFeed deckId={deckId} />
       <CreateCardModal deckId={deckId} />
       <RenameDeckModal deckId={deckId} />

@@ -61,8 +61,7 @@ export default function Flashcards({ cards }: FlashcardsProps) {
   if (cards.length === 0) {
     return (
       <div className="h-96 flex flex-col justify-center items-center rounded-3xl p-10 outline-dashed">
-        <p>This deck is empty!</p>
-        <p>Add a card to populate this deck.</p>
+        <p className="font-bold">This deck is empty!</p>
       </div>
     );
   }

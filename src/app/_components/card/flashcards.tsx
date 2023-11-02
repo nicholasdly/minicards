@@ -7,12 +7,12 @@ import { GarbageIcon } from "../icons";
 
 interface FlashcardsProps {
   cards: {
-    id: number;
-    createdAt: Date;
-    deckId: number;
-    front: string;
-    back: string;
-  }[];
+  id: number;
+  createdAt: Date;
+  deckId: number;
+  front: string;
+  back: string;
+}[];
 }
 
 // Used to check if the current active element is of an input type, so that the flashcard flipping event listener
@@ -22,14 +22,14 @@ const inputTags = ["INPUT", "SELECT", "BUTTON", "TEXTAREA"];
 export default function Flashcards({ cards }: FlashcardsProps) {
   const utils = api.useUtils();
   const [flipped, setFlipped] = useState(false);
-  const [index, setIndex] = useState(0);
-
+    const [index, setIndex] = useState(0);
+  
   const deleteCard = api.card.delete.useMutation({
     onSuccess: () => {
       void utils.deck.get.invalidate();
-      setFlipped(!flipped);
       setIndex(index <= 0 ? 0 : index - 1);
-      toast.success("Successfully deleted front of card!");
+      setFlipped(false);
+      toast.success("Successfully deleted card!");
     },
     onError: (error) => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -43,8 +43,8 @@ export default function Flashcards({ cards }: FlashcardsProps) {
       // Makes sure that the user isn't attempting to do anything other than flip the flashcard.
       if (!document.activeElement || inputTags.includes(document.activeElement.tagName)) return;
       
-      e.preventDefault();
       if (e.key === " ") {
+        e.preventDefault();
         setFlipped(!flipped);
       } else if (e.key === "ArrowLeft") {
         setFlipped(false);
@@ -84,7 +84,7 @@ export default function Flashcards({ cards }: FlashcardsProps) {
           {index + 1}/{cards.length}
         </div>
         <div
-          className="absolute bottom-5 right-5 hover:text-neutral-400 hover:cursor-pointer rounded-full"
+          className="absolute bottom-5 right-5 hover:text-red-500 hover:cursor-pointer rounded-full"
           onClick={() => {
             const card = cards[index];
             if (card?.id) deleteCard.mutate({ id: card.id });

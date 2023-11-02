@@ -37,7 +37,7 @@ export default function CardFeed({ deckId }: CardFeedProps) {
         <p>Press <kbd className="kbd kbd-xs">▶︎</kbd> to go to the next flashcard.</p>
         <p>Press <kbd className="kbd kbd-xs">◀︎</kbd> to go to the previous flashcard.</p>
       </div>
-      <div className="divider mt-10" />
+      <div className="divider mt-24" />
       <div className={`overflow-x-auto ${deck.data.cards.length === 0 ? 'hidden' : 'block'}`}>
         <table className="table">
           <thead>

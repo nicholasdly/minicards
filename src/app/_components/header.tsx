@@ -11,7 +11,6 @@ export default function Header() {
       <div className="flex-none">
         <SignedIn>
           <UserButton
-            showName={true}
             signInUrl="/"
             afterSignOutUrl="/"
           />

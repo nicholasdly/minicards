@@ -15,7 +15,7 @@ export default function Page() {
 function SignedInPage() {
   return (
     <SignedIn>
-      <main className="my-8">
+      <main className="my-5 lg:my-8">
         <DeckFeed />
         <CreateDeckModal />
       </main>

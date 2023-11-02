@@ -25,32 +25,30 @@ export default function CardFeed({ deckId }: CardFeedProps) {
           <span className="text-sm">Created on {dayjs(deck.data.createdAt).format("MMMM D, YYYY")}</span>
           <div className="badge badge-ghost rounded-full mt-1">{deck.data.cards.length} cards</div>
         </div>
-        <div className="items-center">
+        <div className="flex max-lg:flex-col items-center">
           <CreateCardButton />
           <CardOptionsDropdown />
         </div>
       </div>
       <p className="mt-4 mb-6">{deck.data.description}</p>
       <Flashcards cards={deck.data.cards} />
-      <div className="mt-6 flex flex-col items-center gap-0.5">
-        <p>Press <kbd className="kbd kbd-sm">Space</kbd> to flip the flashcard.</p>
-        <p>Press <kbd className="kbd kbd-sm">▶︎</kbd> to go to the next flashcard.</p>
-        <p>Press <kbd className="kbd kbd-sm">◀︎</kbd> to go to the previous flashcard.</p>
+      <div className="mt-6 flex flex-col items-center text-sm gap-0.5">
+        <p>Press <kbd className="kbd kbd-xs">Space</kbd> to flip the flashcard.</p>
+        <p>Press <kbd className="kbd kbd-xs">▶︎</kbd> to go to the next flashcard.</p>
+        <p>Press <kbd className="kbd kbd-xs">◀︎</kbd> to go to the previous flashcard.</p>
       </div>
       <div className="divider mt-10" />
       <div className={`overflow-x-auto ${deck.data.cards.length === 0 ? 'hidden' : 'block'}`}>
         <table className="table">
           <thead>
             <tr>
-              <th></th>
               <th>Front</th>
               <th>Back</th>
             </tr>
           </thead>
           <tbody>
-            {deck.data.cards.map((card, index) => (
+            {deck.data.cards.map(card => (
               <tr key={card.id}>
-                <th>{index + 1}</th>
                 <td>{card.front}</td>
                 <td>{card.back}</td>
               </tr>

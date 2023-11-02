@@ -22,8 +22,8 @@ export const decks = mysqlTable(
   "deck",
   {
     id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
-    title: varchar("title", { length: 24 }).notNull(),
-    description: varchar("description", { length: 175 }).notNull(),
+    title: varchar("title", { length: 75 }).notNull(),
+    description: varchar("description", { length: 300 }).notNull(),
     creatorId: varchar("creator_id", { length: 256 }).notNull(),
     createdAt: timestamp("created_at")
       .default(sql`CURRENT_TIMESTAMP`)
@@ -40,8 +40,8 @@ export const cards = mysqlTable(
   {
     id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
     deckId: bigint("deck_id", { mode: "number" }).notNull(),
-    front: varchar("front", { length: 256 }).notNull(),
-    back: varchar("back", { length: 256 }).notNull(),
+    front: varchar("front", { length: 600 }).notNull(),
+    back: varchar("back", { length: 600 }).notNull(),
     createdAt: timestamp("created_at")
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),

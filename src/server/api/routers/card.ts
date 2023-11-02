@@ -26,11 +26,11 @@ export const cardRouter = createTRPCRouter({
       front: z
         .string()
         .min(1, { message: "A flashcard must have content for the front!" })
-        .max(256, { message: "The front of your flashcard cannot exceed 256 characters!" }),
+        .max(600, { message: "The front of your flashcard can't exceed 600 characters!" }),
       back: z
         .string()
         .min(1, { message: "A flashcard must have content for the back!" })
-        .max(256, { message: "The back of your flashcard cannot exceed 256 characters!" }),
+        .max(600, { message: "The back of your flashcard can't exceed 600 characters!" }),
     }))
     .mutation(async ({ ctx, input }) => {
       const creatorId = ctx.userId;

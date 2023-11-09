@@ -1,18 +1,18 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
+import { EditIcon } from "../shared/icons";
+import { Dialog } from "@headlessui/react";
 import { api } from "~/trpc/react";
-import { GarbageIcon } from "../icons";
+import toast from "react-hot-toast";
 
 interface FlashcardsProps {
   cards: {
-  id: number;
-  createdAt: Date;
-  deckId: number;
-  front: string;
-  back: string;
-}[];
+    id: number;
+    deckId: number;
+    front: string;
+    back: string;
+  }[];
 }
 
 // Used to check if the current active element is of an input type, so that the flashcard flipping event listener
@@ -21,22 +21,27 @@ const inputTags = ["INPUT", "SELECT", "BUTTON", "TEXTAREA"];
 
 export default function Flashcards({ cards }: FlashcardsProps) {
   const utils = api.useUtils();
+
+  const [isEditModalOpen, setEditModalOpen] = useState(false);
+  const openEditModal = () => setEditModalOpen(true);
+  const closeEditModal = () => setEditModalOpen(false);
+
   const [flipped, setFlipped] = useState(false);
-    const [index, setIndex] = useState(0);
-  
-  const deleteCard = api.card.delete.useMutation({
+  const [index, setIndex] = useState(0);
+  const [front, setFront] = useState("");
+  const [back, setBack] = useState("");
+
+  const updateCard = api.card.update.useMutation({
     onSuccess: () => {
       void utils.deck.get.invalidate();
-      setIndex(index <= 0 ? 0 : index - 1);
-      setFlipped(false);
-      toast.success("Successfully deleted card!");
+      toast.success("Successfully updated deck!");
     },
     onError: (error) => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       const message = JSON.parse(error.message)[0].message as string;
       toast.error(message ? message : "Something went wrong!");
     },
-  })
+  });
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -80,19 +85,65 @@ export default function Flashcards({ cards }: FlashcardsProps) {
             <p className="text-sm sm:text-base lg:text-xl">{cards[index]?.back}</p>
           </div>
         </div>
-        <div className="absolute top-5 right-5">
+        <div className="absolute top-5 left-5">
           {index + 1}/{cards.length}
         </div>
-        <div
-          className="absolute bottom-5 right-5 hover:text-red-500 hover:cursor-pointer rounded-full"
+        <button
+          className="absolute top-5 right-5 hover:text-neutral-400 tooltip"
+          data-tip="Edit Card"
           onClick={() => {
-            const card = cards[index];
-            if (card?.id) deleteCard.mutate({ id: card.id });
+            setFront(cards[index]!.front);
+            setBack(cards[index]!.back);
+            openEditModal();
           }}
         >
-          <GarbageIcon />
-        </div>
+          <EditIcon />
+        </button>
       </div>
+
+      <Dialog as="div" className="relative z-10" open={isEditModalOpen} onClose={closeEditModal}>
+        <div className="fixed inset-0 bg-black/25" />
+        <div className="fixed inset-0 overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-4">
+            <Dialog.Panel className="w-full max-w-md overflow-hidden rounded-2xl bg-base-100 p-6 align-middle">
+              <Dialog.Title as="h3" className="text-lg font-medium">Edit flashcard</Dialog.Title>
+              <div className="flex flex-col gap-3 mt-2">
+                <input
+                  type="text"
+                  placeholder="Front"
+                  className="input input-bordered w-full"
+                  value={front}
+                  onChange={(e) => setFront(e.target.value)}
+                />
+                <input
+                  type="text"
+                  placeholder="Back"
+                  className="input input-bordered w-full"
+                  value={back}
+                  onChange={(e) => setBack(e.target.value)}
+                />
+              </div>
+              <div className="flex gap-3 mt-4">
+                <button 
+                  className="btn normal-case"
+                  onClick={closeEditModal}
+                >
+                  Close
+                </button>
+                <button
+                  className="btn normal-case"
+                  onClick={() => {
+                    updateCard.mutate({ id: cards[index]!.id, front, back });
+                    closeEditModal();
+                  }}
+                >
+                  Save
+                </button>
+              </div>
+            </Dialog.Panel>
+          </div>
+        </div>
+      </Dialog>
     </>
   );
 }

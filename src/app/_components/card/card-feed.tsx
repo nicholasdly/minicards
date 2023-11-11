@@ -6,7 +6,7 @@ import dayjs from "dayjs";
 import Flashcards from "./flashcards";
 import Link from "next/link";
 import Image from "next/image";
-import { HelpIcon, SettingsIcon, ShareIcon, ShuffleIcon, UnknownIcon } from "../shared/icons";
+import { HelpIcon, SettingsIcon, ShareIcon, UnknownIcon } from "../shared/icons";
 import { Dialog } from "@headlessui/react";
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -41,17 +41,17 @@ export default function CardFeed({ id }: CardFeedProps) {
         <p className="mt-4 mb-6">{deck.description}</p>
         <Flashcards cards={deck.cards} />
         <div className="flex justify-between mt-6 mx-4">
-          <button className="hover:text-neutral-400 tooltip" data-tip="Shuffle">
+          {/* <button className="hover:text-neutral-400 tooltip" data-tip="Shuffle">
             <ShuffleIcon size={28} />
-          </button>
-          <div className="flex gap-3">
-            <Link href={`./${id}/edit`} className="hover:text-neutral-400 rounded-full tooltip" data-tip="Edit Deck">
-              <SettingsIcon size={28} />
-            </Link>
+          </button> */}
+          {/* <div className="flex gap-3"> */}
             <button className="hover:text-neutral-400 rounded-full tooltip" data-tip="Help" onClick={openHelpModal}>
               <HelpIcon size={28} />
             </button>
-          </div>
+            <Link href={`./${id}/edit`} className="hover:text-neutral-400 rounded-full tooltip" data-tip="Edit Deck">
+              <SettingsIcon size={28} />
+            </Link>
+          {/* </div> */}
         </div>
         <div className="divider" />
         <div className="flex items-center justify-between">

@@ -24,16 +24,21 @@ const ratelimit = new Ratelimit({
 
 export const cardRouter = createTRPCRouter({
 
+  /**
+   * Updates a specified flashcard.
+   */
   update: privateProcedure
     .input(z.object({
       id: z.number().int().positive().finite(),
       front: z
         .string()
-        .min(MIN_CARD_FRONT_LENGTH, { message: "A flashcard must have content for the front!" })
+        .trim()
+        .min(MIN_CARD_FRONT_LENGTH, { message: `The front of a flashcard must exceed ${MIN_CARD_FRONT_LENGTH} characters!` })
         .max(MAX_CARD_FRONT_LENGTH, { message: `The front of a flashcard can't exceed ${MAX_CARD_FRONT_LENGTH} characters!` }),
       back: z
         .string()
-        .min(MIN_CARD_BACK_LENGTH, { message: "A flashcard must have content for the back!" })
+        .trim()
+        .min(MIN_CARD_BACK_LENGTH, { message: `The back of a flashcard must exceed ${MIN_CARD_BACK_LENGTH} characters!` })
         .max(MAX_CARD_BACK_LENGTH, { message: `The back of a flashcard can't exceed ${MAX_CARD_BACK_LENGTH} characters!` }),
     }))
     .mutation(async ({ ctx, input }) => {
@@ -44,5 +49,21 @@ export const cardRouter = createTRPCRouter({
 
       await ctx.db.update(cards).set({ front: input.front, back: input.back }).where(eq(cards.id, input.id));
     }),
+
+    /**
+     * Deletes a specified flashcard.
+     */
+    delete: privateProcedure
+      .input(z.object({
+        id: z.number().int().positive().finite(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const user = ctx.userId;
+
+        const { success } = await ratelimit.limit(user);
+        if (!success) throw new TRPCError({ code: "TOO_MANY_REQUESTS" });
+
+        await ctx.db.delete(cards).where(eq(cards.id, input.id));
+      }),
 
 });

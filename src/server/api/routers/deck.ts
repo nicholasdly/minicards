@@ -12,6 +12,7 @@ import {
   MIN_CARD_BACK_LENGTH,
   MIN_CARD_FRONT_LENGTH,
   MIN_DECK_DESCRIPTION_LENGTH,
+  MIN_DECK_SIZE,
   MIN_DECK_TITLE_LENGTH,
 } from "~/constants";
 
@@ -36,22 +37,26 @@ export const deckRouter = createTRPCRouter({
     .input(z.object({
       title: z
         .string()
-        .min(MIN_DECK_TITLE_LENGTH, { message: "A deck must have a title!" })
-        .max(MAX_DECK_TITLE_LENGTH, { message: `Your deck title can't exceed ${MAX_DECK_TITLE_LENGTH} characters!` }),
+        .trim()
+        .min(MIN_DECK_TITLE_LENGTH, { message: `The title of a deck must exceed ${MIN_DECK_TITLE_LENGTH} characters!` })
+        .max(MAX_DECK_TITLE_LENGTH, { message: `The title of a deck can't exceed ${MAX_DECK_TITLE_LENGTH} characters!` }),
       description: z
         .string()
-        .min(MIN_DECK_DESCRIPTION_LENGTH, { message: "A deck must have a description!" })
-        .max(MAX_DECK_DESCRIPTION_LENGTH, { message: `Your deck description can't exceed ${MAX_DECK_DESCRIPTION_LENGTH} characters!` }),
+        .trim()
+        .min(MIN_DECK_DESCRIPTION_LENGTH, { message: `The description of a deck must exceed ${MIN_DECK_DESCRIPTION_LENGTH} characters!` })
+        .max(MAX_DECK_DESCRIPTION_LENGTH, { message: `The description of a deck can't exceed ${MAX_DECK_DESCRIPTION_LENGTH} characters!` }),
       cards: z.object({
         front: z
           .string()
-          .min(MIN_CARD_FRONT_LENGTH, { message: "A flashcard must have content for the front!" })
+          .trim()
+          .min(MIN_CARD_FRONT_LENGTH, { message: `The front of a flashcard must exceed ${MIN_CARD_FRONT_LENGTH} characters!` })
           .max(MAX_CARD_FRONT_LENGTH, { message: `The front of a flashcard can't exceed ${MAX_CARD_FRONT_LENGTH} characters!` }),
         back: z
           .string()
-          .min(MIN_CARD_BACK_LENGTH, { message: "A flashcard must have content for the back!" })
+          .trim()
+          .min(MIN_CARD_BACK_LENGTH, { message: `The back of a flashcard must exceed ${MIN_CARD_BACK_LENGTH} characters!` })
           .max(MAX_CARD_BACK_LENGTH, { message: `The back of a flashcard can't exceed ${MAX_CARD_BACK_LENGTH} characters!` }),
-      }).array(),
+      }).array().min(MIN_DECK_SIZE, { message: `A deck must have at least ${MIN_DECK_SIZE} cards!` }),
     }))
     .mutation(async ({ ctx, input }) => {
       const creatorId = ctx.userId;
@@ -83,7 +88,7 @@ export const deckRouter = createTRPCRouter({
    */
   get: privateProcedure
     .input(z.object({
-      publicId: z.string().min(1),
+      publicId: z.string().trim().min(1),
     }))
     .query(async ({ ctx, input }) => {
       const deck = await ctx.db.query.decks.findFirst({
@@ -117,23 +122,27 @@ export const deckRouter = createTRPCRouter({
       id: z.number().int().positive().finite(),
       title: z
         .string()
-        .min(MIN_DECK_TITLE_LENGTH, { message: "A deck must have a title!" })
-        .max(MAX_DECK_TITLE_LENGTH, { message: `Your deck title can't exceed ${MAX_DECK_TITLE_LENGTH} characters!` }),
+        .trim()
+        .min(MIN_DECK_TITLE_LENGTH, { message: `The title of a deck must exceed ${MIN_DECK_TITLE_LENGTH} characters!` })
+        .max(MAX_DECK_TITLE_LENGTH, { message: `The title of a deck can't exceed ${MAX_DECK_TITLE_LENGTH} characters!` }),
       description: z
         .string()
-        .min(MIN_DECK_DESCRIPTION_LENGTH, { message: "A deck must have a description!" })
-        .max(MAX_DECK_DESCRIPTION_LENGTH, { message: `Your deck description can't exceed ${MAX_DECK_DESCRIPTION_LENGTH} characters!` }),
-      flashcards: z.object({
+        .trim()
+        .min(MIN_DECK_DESCRIPTION_LENGTH, { message: `The description of a deck must exceed ${MIN_DECK_DESCRIPTION_LENGTH} characters!` })
+        .max(MAX_DECK_DESCRIPTION_LENGTH, { message: `The description of a deck can't exceed ${MAX_DECK_DESCRIPTION_LENGTH} characters!` }),
+      cards: z.object({
         id: z.number().int().positive().finite().optional(),
         front: z
           .string()
-          .min(MIN_CARD_FRONT_LENGTH, { message: "A flashcard must have content for the front!" })
+          .trim()
+          .min(MIN_CARD_FRONT_LENGTH, { message: `The front of a flashcard must exceed ${MIN_CARD_FRONT_LENGTH} characters!` })
           .max(MAX_CARD_FRONT_LENGTH, { message: `The front of a flashcard can't exceed ${MAX_CARD_FRONT_LENGTH} characters!` }),
         back: z
           .string()
-          .min(MIN_CARD_BACK_LENGTH, { message: "A flashcard must have content for the back!" })
+          .trim()
+          .min(MIN_CARD_BACK_LENGTH, { message: `The back of a flashcard must exceed ${MIN_CARD_BACK_LENGTH} characters!` })
           .max(MAX_CARD_BACK_LENGTH, { message: `The back of a flashcard can't exceed ${MAX_CARD_BACK_LENGTH} characters!` }),
-      }).array(),
+      }).array().min(MIN_DECK_SIZE, { message: `A deck must have at least ${MIN_DECK_SIZE} cards!` }),
     }))
     .mutation(async ({ ctx, input }) => {
       const creatorId = ctx.userId;
@@ -145,7 +154,7 @@ export const deckRouter = createTRPCRouter({
         await tx.update(decks)
           .set({ title: input.title, description: input.description })
           .where(eq(decks.id, input.id));
-        for (const card of input.flashcards) {
+        for (const card of input.cards) {
           if (card.id !== undefined) {
             await tx.update(cards).set({ front: card.front, back: card.back }).where(eq(cards.id, card.id));
           } else {

@@ -53,14 +53,8 @@ export default function CreateDeckForm() {
             <div className="flex px-3 items-center justify-between">
               <div className="text-lg font-medium">{index + 1}</div>
               <button
-                className=" hover:text-red-500"
-                onClick={() => {
-                  if (cards.length > 3) {
-                    setCards(cards.toSpliced(index, 1));
-                  } else {
-                    toast.error("A deck must have at least 3 cards!");
-                  }
-                }}
+                className="hover:text-red-500"
+                onClick={() => setCards(cards.toSpliced(index, 1))}
               >
                 <GarbageIcon size={20} />
               </button>

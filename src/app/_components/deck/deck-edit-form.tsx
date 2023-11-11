@@ -6,6 +6,7 @@ import { GarbageIcon } from "../shared/icons";
 import toast from "react-hot-toast";
 import { api } from "~/trpc/react";
 import { Dialog } from "@headlessui/react";
+import { MIN_DECK_SIZE } from "~/constants";
 
 interface EditDeckFormProps {
   deck: {
@@ -88,7 +89,13 @@ export default function EditDeckForm({ deck }: EditDeckFormProps) {
                 <div className="text-lg font-medium">{index + 1}</div>
                 <button
                   className="hover:text-red-500"
-                  onClick={() => setCards(cards.toSpliced(index, 1))}
+                  onClick={() => {
+                    if (cards.length > MIN_DECK_SIZE) {
+                      setCards(cards.toSpliced(index, 1))
+                    } else {
+                      toast.error(`A deck must have atleast ${MIN_DECK_SIZE} cards!`);
+                    }
+                  }}
                 >
                   <GarbageIcon size={20} />
                 </button>

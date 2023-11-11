@@ -10,7 +10,8 @@
     "lint": "next lint",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run --reporter verbose"
+    "test": "vitest run --reporter verbose",
+    "checks": "tsc --noEmit && next lint && vitest run"
   },
   "dependencies": {
     "@clerk/nextjs": "^4.25.7",

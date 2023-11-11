@@ -2,7 +2,7 @@ import { clerkClient } from "@clerk/nextjs";
 import { TRPCError } from "@trpc/server";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
-import { eq } from "drizzle-orm";
+import { eq, notInArray } from "drizzle-orm";
 import { z } from "zod";
 import {
   MAX_CARD_BACK_LENGTH,
@@ -66,7 +66,12 @@ export const deckRouter = createTRPCRouter({
 
       await ctx.db.transaction(async (tx) => {
         const publicId = generateNanoId();
-        const deck = await tx.insert(decks).values({ title: input.title, description: input.description, publicId, creatorId });
+        const deck = await tx.insert(decks).values({
+          title: input.title,
+          description: input.description,
+          publicId,
+          creatorId
+        });
         await tx.insert(cards).values(input.cards.map(card => ({ ...card, deckId: Number(deck.insertId) })));
       });
     }),
@@ -99,6 +104,7 @@ export const deckRouter = createTRPCRouter({
       if (!deck) return { deck, creator: undefined };
 
       try {
+        // getUser() throws error if user is not found with that creatorId
         const creator = await clerkClient.users.getUser(deck.creatorId);
         return {
           deck,
@@ -151,9 +157,16 @@ export const deckRouter = createTRPCRouter({
       if (!success) throw new TRPCError({ code: "TOO_MANY_REQUESTS" });
 
       await ctx.db.transaction(async (tx) => {
+        // update deck title and description
         await tx.update(decks)
           .set({ title: input.title, description: input.description })
           .where(eq(decks.id, input.id));
+
+        // delete removed cards (note: empty maintainedIds array causes error, so that is avoided)
+        const maintainedIds = input.cards.filter(card => card.id !== undefined).map(card => card.id!);
+        await tx.delete(cards).where(notInArray(cards.id, maintainedIds.length > 0 ? maintainedIds : [-1]));
+
+        // update maintained cards and/or insert new cards
         for (const card of input.cards) {
           if (card.id !== undefined) {
             await tx.update(cards).set({ front: card.front, back: card.back }).where(eq(cards.id, card.id));

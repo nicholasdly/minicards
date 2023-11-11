@@ -50,20 +50,4 @@ export const cardRouter = createTRPCRouter({
       await ctx.db.update(cards).set({ front: input.front, back: input.back }).where(eq(cards.id, input.id));
     }),
 
-    /**
-     * Deletes a specified flashcard.
-     */
-    delete: privateProcedure
-      .input(z.object({
-        id: z.number().int().positive().finite(),
-      }))
-      .mutation(async ({ ctx, input }) => {
-        const user = ctx.userId;
-
-        const { success } = await ratelimit.limit(user);
-        if (!success) throw new TRPCError({ code: "TOO_MANY_REQUESTS" });
-
-        await ctx.db.delete(cards).where(eq(cards.id, input.id));
-      }),
-
 });

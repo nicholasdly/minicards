@@ -1,169 +1,933 @@
-import { expect, it } from "vitest";
+import { describe, expect, test } from "vitest";
 import { appRouter } from "~/server/api/root";
 import { createInnerTRPCContext } from "~/server/api/trpc";
+import { TRPCError } from "@trpc/server";
 import { type RouterInputs } from "~/trpc/shared";
+import {
+  MAX_CARD_BACK_LENGTH,
+  MAX_CARD_FRONT_LENGTH,
+  MAX_DECK_DESCRIPTION_LENGTH,
+  MAX_DECK_TITLE_LENGTH,
+  MIN_CARD_BACK_LENGTH,
+  MIN_CARD_FRONT_LENGTH,
+  MIN_DECK_DESCRIPTION_LENGTH,
+  MIN_DECK_SIZE,
+  MIN_DECK_TITLE_LENGTH
+} from "~/constants";
+import { ZodError } from "zod";
 
-it("unauthorized user should not be able to create a deck", async () => {
-  const ctx = createInnerTRPCContext({ headers: new Headers, userId: null });
-  const caller = appRouter.createCaller(ctx);
+describe("create deck", () => {
 
-  const input: RouterInputs["deck"]["create"] = {
-    title: "test deck title",
-    description: "test deck description",
-  };
-
-  await expect(caller.deck.create(input)).rejects.toThrowError();
-});
-
-it("unauthorized user should not be able to retrieve decks", async () => {
-  const ctx = createInnerTRPCContext({ headers: new Headers, userId: null });
-  const caller = appRouter.createCaller(ctx);
-
-  await expect(caller.deck.getAll()).rejects.toThrowError();
-});
-
-it("unauthorized user should not be able to retrieve a deck", async () => {
-  const ctx = createInnerTRPCContext({ headers: new Headers, userId: null });
-  const caller = appRouter.createCaller(ctx);
-
-  await expect(caller.deck.get({ id: 1 })).rejects.toThrowError();
-});
-
-it("unauthorized user should not be able to update a deck's title", async () => {
-  const ctx = createInnerTRPCContext({ headers: new Headers, userId: null });
-  const caller = appRouter.createCaller(ctx);
-
-  const input: RouterInputs["deck"]["updateTitle"] = {
-    id: 1,
-    title: "test deck updated title"
-  }
-
-  await expect(caller.deck.updateTitle(input)).rejects.toThrowError();
-});
-
-it("unauthorized user should not be able to update a deck's description", async () => {
-  const ctx = createInnerTRPCContext({ headers: new Headers, userId: null });
-  const caller = appRouter.createCaller(ctx);
-
-  const input: RouterInputs["deck"]["updateDescription"] = {
-    id: 1,
-    description: "test deck updated description"
-  }
-
-  await expect(caller.deck.updateDescription(input)).rejects.toThrowError();
-});
-
-it("unauthorized user should not be able to delete a deck", async () => {
-  const ctx = createInnerTRPCContext({ headers: new Headers, userId: null });
-  const caller = appRouter.createCaller(ctx);
-
-  await expect(caller.deck.delete({ id: 1 })).rejects.toThrowError();
-});
-
-it("user must provide a valid deck title to create a deck", async () => {
-  const ctx = createInnerTRPCContext({ headers: new Headers, userId: "test user id" });
-  const caller = appRouter.createCaller(ctx);
-
-  let input: RouterInputs["deck"]["create"];
+  test("unauthorized user should not be able to create a deck", async () => {
+    const ctx = createInnerTRPCContext({ headers: new Headers, userId: null });
+    const caller = appRouter.createCaller(ctx);
   
-  // title must be of length greater than 0
-  input = {
-    title: "",
-    description: "valid description",
-  };
-  await expect(caller.deck.create(input)).rejects.toThrowError();
+    const input: RouterInputs["deck"]["create"] = {
+      title: "valid deck title",
+      description: "valid deck description",
+      cards: new Array<{ front: string, back: string }>(MIN_DECK_SIZE).fill({
+        front: "valid card front",
+        back: "valid card back"
+      }),
+    };
 
-  // title must be of length less than 25
-  input = {
-    title: "qwertyuiopasdfghjklzxcvbn",
-    description: "valid description",
-  }
-  await expect(caller.deck.create(input)).rejects.toThrowError();
-});
-
-it("user must provide a valid deck description to create a deck", async () => {
-  const ctx = createInnerTRPCContext({ headers: new Headers, userId: "test user id" });
-  const caller = appRouter.createCaller(ctx);
-
-  let input: RouterInputs["deck"]["create"];
-
-  // description must be of length greater than 0
-  input = {
-    title: "valid title",
-    description: "",
-  };
-  await expect(caller.deck.create(input)).rejects.toThrowError();
-
-  // description must be of length less than 176
-  input = {
-    title: "valid title",
-    description: "kzrtrSYNW2TrAjMyiyYMSJpLCRg0AJiDrxiT90iE4r08haAEhaqGttKk9UFgiDx8rdiyXpmH1htfE2Vyg1kvdLUAEjzbi1J4Ly6UpUpgfQRaxZncEByjafLha6NkMwPHqvawiHRECHmxCAAR45Na05AQC4WUD5R6w4gp6JFfTGWdeGz1",
-  };
-  await expect(caller.deck.create(input)).rejects.toThrowError();
-});
-
-it("user must provide a valid deck ID to retrieve a deck", async () => {
-  const ctx = createInnerTRPCContext({ headers: new Headers, userId: "test user id" });
-  const caller = appRouter.createCaller(ctx);
-
-  await expect(caller.deck.get({ id: 3.145 })).rejects.toThrowError(); // must be integer
-  await expect(caller.deck.get({ id: 0 })).rejects.toThrowError();  // must be greater than zero
-  await expect(caller.deck.get({ id: -5 })).rejects.toThrowError();  // must be positive
-  await expect(caller.deck.get({ id: Infinity })).rejects.toThrowError();  // must be finite
-});
-
-it("user must provide a valid deck ID when updating a deck's title", async () => {
-  const ctx = createInnerTRPCContext({ headers: new Headers, userId: "test user id" });
-  const caller = appRouter.createCaller(ctx);
-
-  await expect(caller.deck.updateTitle({ id: 3.145, title: "valid title" })).rejects.toThrowError(); // must be integer
-  await expect(caller.deck.updateTitle({ id: 0, title: "valid title" })).rejects.toThrowError();  // must be greater than zero
-  await expect(caller.deck.updateTitle({ id: -5, title: "valid title" })).rejects.toThrowError();  // must be positive
-  await expect(caller.deck.updateTitle({ id: Infinity, title: "valid title" })).rejects.toThrowError();  // must be finite
-});
-
-it("user must provide a valid deck title when updating a deck's title", async () => {
-  const ctx = createInnerTRPCContext({ headers: new Headers, userId: "test user id" });
-  const caller = appRouter.createCaller(ctx);
+    const error = new TRPCError({ code: "UNAUTHORIZED" });
   
-  // title must be of length greater than 0
-  await expect(caller.deck.updateTitle({ id: 1, title: "" })).rejects.toThrowError();
+    await expect(caller.deck.create(input)).rejects.toThrow(error);
+  });
 
-  // title must be of length less than 25
-  await expect(caller.deck.updateTitle({ id: 1, title: "qwertyuiopasdfghjklzxcvbn" })).rejects.toThrowError();
+  test(`deck title must exceed ${MIN_DECK_TITLE_LENGTH} characters`, async () => {
+    const ctx = createInnerTRPCContext({ headers: new Headers, userId: "valid user id" });
+    const caller = appRouter.createCaller(ctx);
+  
+    const input: RouterInputs["deck"]["create"] = {
+      title: "x".repeat(MIN_DECK_TITLE_LENGTH - 1),
+      description: "valid deck description",
+      cards: new Array<{ front: string, back: string }>(MIN_DECK_SIZE).fill({
+        front: "valid card front",
+        back: "valid card back"
+      }),
+    };
+
+    const error = new ZodError([
+      {
+        code: "too_small",
+        minimum: MIN_DECK_TITLE_LENGTH,
+        type: "string",
+        inclusive: true,
+        exact: false,
+        message: `The title of a deck must exceed ${MIN_DECK_TITLE_LENGTH} characters!`,
+        path: ["title"],
+      }
+    ]);
+  
+    await expect(caller.deck.create(input)).rejects.toThrow(error);
+  });
+
+  test(`deck title can't exceed ${MAX_DECK_TITLE_LENGTH} characters`, async () => {
+    const ctx = createInnerTRPCContext({ headers: new Headers, userId: "valid user id" });
+    const caller = appRouter.createCaller(ctx);
+  
+    const input: RouterInputs["deck"]["create"] = {
+      title: "x".repeat(MAX_DECK_TITLE_LENGTH + 1),
+      description: "valid deck description",
+      cards: new Array<{ front: string, back: string }>(MIN_DECK_SIZE).fill({
+        front: "valid card front",
+        back: "valid card back"
+      }),
+    };
+
+    const error = new ZodError([
+      {
+        code: "too_big",
+        maximum: MAX_DECK_TITLE_LENGTH,
+        type: "string",
+        inclusive: true,
+        exact: false,
+        message: `The title of a deck can't exceed ${MAX_DECK_TITLE_LENGTH} characters!`,
+        path: ["title"],
+      }
+    ]);
+  
+    await expect(caller.deck.create(input)).rejects.toThrow(error);
+  });
+
+  test(`deck description must exceed ${MIN_DECK_DESCRIPTION_LENGTH} characters`, async () => {
+    const ctx = createInnerTRPCContext({ headers: new Headers, userId: "valid user id" });
+    const caller = appRouter.createCaller(ctx);
+  
+    const input: RouterInputs["deck"]["create"] = {
+      title: "valid deck title",
+      description: "x".repeat(MIN_DECK_DESCRIPTION_LENGTH - 1),
+      cards: new Array<{ front: string, back: string }>(MIN_DECK_SIZE).fill({
+        front: "valid card front",
+        back: "valid card back"
+      }),
+    };
+
+    const error = new ZodError([
+      {
+        code: "too_small",
+        minimum: MIN_DECK_DESCRIPTION_LENGTH,
+        type: "string",
+        inclusive: true,
+        exact: false,
+        message: `The description of a deck must exceed ${MIN_DECK_DESCRIPTION_LENGTH} characters!`,
+        path: ["description"],
+      }
+    ]);
+  
+    await expect(caller.deck.create(input)).rejects.toThrow(error);
+  });
+
+  test(`deck description can't exceed ${MAX_DECK_DESCRIPTION_LENGTH} characters`, async () => {
+    const ctx = createInnerTRPCContext({ headers: new Headers, userId: "valid user id" });
+    const caller = appRouter.createCaller(ctx);
+  
+    const input: RouterInputs["deck"]["create"] = {
+      title: "valid deck title",
+      description: "x".repeat(MAX_DECK_DESCRIPTION_LENGTH + 1),
+      cards: new Array<{ front: string, back: string }>(MIN_DECK_SIZE).fill({
+        front: "valid card front",
+        back: "valid card back"
+      }),
+    };
+
+    const error = new ZodError([
+      {
+        code: "too_big",
+        maximum: MAX_DECK_DESCRIPTION_LENGTH,
+        type: "string",
+        inclusive: true,
+        exact: false,
+        message: `The description of a deck can't exceed ${MAX_DECK_DESCRIPTION_LENGTH} characters!`,
+        path: ["description"],
+      }
+    ]);
+  
+    await expect(caller.deck.create(input)).rejects.toThrow(error);
+  });
+
+  test(`deck must have at least ${MIN_DECK_SIZE} cards`, async () => {
+    const ctx = createInnerTRPCContext({ headers: new Headers, userId: "valid user id" });
+    const caller = appRouter.createCaller(ctx);
+  
+    const input: RouterInputs["deck"]["create"] = {
+      title: "valid deck title",
+      description: "valid deck description",
+      cards: new Array<{ front: string, back: string }>(MIN_DECK_SIZE - 1).fill({
+        front: "valid card front",
+        back: "valid card back"
+      }),
+    };
+
+    const error = new ZodError([
+      {
+        code: "too_small",
+        minimum: MIN_DECK_SIZE,
+        type: "array",
+        inclusive: true,
+        exact: false,
+        message: `A deck must have at least ${MIN_DECK_SIZE} cards!`,
+        path: ["cards"],
+      }
+    ]);
+  
+    await expect(caller.deck.create(input)).rejects.toThrow(error);
+  });
+
+  test(`card front string must exceed ${MIN_CARD_FRONT_LENGTH} characters`, async () => {
+    const ctx = createInnerTRPCContext({ headers: new Headers, userId: "valid user id" });
+    const caller = appRouter.createCaller(ctx);
+  
+    const input: RouterInputs["deck"]["create"] = {
+      title: "valid deck title",
+      description: "valid deck description",
+      cards: [
+        { front: "valid card front", back: "valid card back" },
+        { front: "x".repeat(MIN_CARD_FRONT_LENGTH - 1), back: "valid card back" },
+        { front: "valid card front", back: "valid card back" },
+      ],
+    };
+
+    const error = new ZodError([
+      {
+        code: "too_small",
+        minimum: MIN_CARD_FRONT_LENGTH,
+        type: "string",
+        inclusive: true,
+        exact: false,
+        message: `The front of a flashcard must exceed ${MIN_CARD_FRONT_LENGTH} characters!`,
+        path: ["cards", 1, "front"],
+      }
+    ]);
+  
+    await expect(caller.deck.create(input)).rejects.toThrow(error);
+  });
+  
+  test(`card front string can't exceed ${MAX_CARD_FRONT_LENGTH} characters`, async () => {
+    const ctx = createInnerTRPCContext({ headers: new Headers, userId: "valid user id" });
+    const caller = appRouter.createCaller(ctx);
+  
+    const input: RouterInputs["deck"]["create"] = {
+      title: "valid deck title",
+      description: "valid deck description",
+      cards: [
+        { front: "valid card front", back: "valid card back" },
+        { front: "x".repeat(MAX_CARD_FRONT_LENGTH + 1), back: "valid card back" },
+        { front: "valid card front", back: "valid card back" },
+      ],
+    };
+
+    const error = new ZodError([
+      {
+        code: "too_big",
+        maximum: MAX_CARD_FRONT_LENGTH,
+        type: "string",
+        inclusive: true,
+        exact: false,
+        message: `The front of a flashcard can't exceed ${MAX_CARD_FRONT_LENGTH} characters!`,
+        path: ["cards", 1, "front"],
+      }
+    ]);
+  
+    await expect(caller.deck.create(input)).rejects.toThrow(error);
+  });
+  
+  test(`card back string must exceed ${MIN_CARD_BACK_LENGTH} characters`, async () => {
+    const ctx = createInnerTRPCContext({ headers: new Headers, userId: "valid user id" });
+    const caller = appRouter.createCaller(ctx);
+  
+    const input: RouterInputs["deck"]["create"] = {
+      title: "valid deck title",
+      description: "valid deck description",
+      cards: [
+        { front: "valid card front", back: "valid card back" },
+        { front: "valid card front", back: "x".repeat(MIN_CARD_BACK_LENGTH - 1) },
+        { front: "valid card front", back: "valid card back" },
+      ],
+    };
+
+    const error = new ZodError([
+      {
+        code: "too_small",
+        minimum: MIN_CARD_BACK_LENGTH,
+        type: "string",
+        inclusive: true,
+        exact: false,
+        message: `The back of a flashcard must exceed ${MIN_CARD_BACK_LENGTH} characters!`,
+        path: ["cards", 1, "back"],
+      }
+    ]);
+  
+    await expect(caller.deck.create(input)).rejects.toThrow(error);
+  });
+  
+  test(`card back string can't exceed ${MAX_CARD_BACK_LENGTH} characters`, async () => {
+    const ctx = createInnerTRPCContext({ headers: new Headers, userId: "valid user id" });
+    const caller = appRouter.createCaller(ctx);
+  
+    const input: RouterInputs["deck"]["create"] = {
+      title: "valid deck title",
+      description: "valid deck description",
+      cards: [
+        { front: "valid card front", back: "valid card back" },
+        { front: "valid card front", back: "x".repeat(MAX_CARD_BACK_LENGTH + 1) },
+        { front: "valid card front", back: "valid card back" },
+      ],
+    };
+
+    const error = new ZodError([
+      {
+        code: "too_big",
+        maximum: MAX_CARD_BACK_LENGTH,
+        type: "string",
+        inclusive: true,
+        exact: false,
+        message: `The back of a flashcard can't exceed ${MAX_CARD_BACK_LENGTH} characters!`,
+        path: ["cards", 1, "back"],
+      }
+    ]);
+  
+    await expect(caller.deck.create(input)).rejects.toThrow(error);
+  });
+
 });
 
-it("user must provide a valid deck ID when updating a deck's description", async () => {
-  const ctx = createInnerTRPCContext({ headers: new Headers, userId: "test user id" });
-  const caller = appRouter.createCaller(ctx);
+describe("get all user decks", () => {
 
-  await expect(caller.deck.updateDescription({ id: 3.145, description: "valid description" })).rejects.toThrowError(); // must be integer
-  await expect(caller.deck.updateDescription({ id: 0, description: "valid description" })).rejects.toThrowError();  // must be greater than zero
-  await expect(caller.deck.updateDescription({ id: -5, description: "valid description" })).rejects.toThrowError();  // must be positive
-  await expect(caller.deck.updateDescription({ id: Infinity, description: "valid description" })).rejects.toThrowError();  // must be finite
+  test("unauthorized user should not be able to retrieve current user decks", async () => {
+    const ctx = createInnerTRPCContext({ headers: new Headers, userId: null });
+    const caller = appRouter.createCaller(ctx);
+
+    const error = new TRPCError({ code: "UNAUTHORIZED" });
+  
+    await expect(caller.deck.getAllUser()).rejects.toThrow(error);
+  });
+
 });
 
-it("user must provide a valid deck description when updating a deck's description", async () => {
-  const ctx = createInnerTRPCContext({ headers: new Headers, userId: "test user id" });
-  const caller = appRouter.createCaller(ctx);
+describe("get deck", () => {
 
-  // description must be of length greater than 0
-  await expect(caller.deck.updateDescription({ id: 1, description: "" })).rejects.toThrowError();
+  test("unauthorized user should not be able to retrieve a specific deck", async () => {
+    const ctx = createInnerTRPCContext({ headers: new Headers, userId: null });
+    const caller = appRouter.createCaller(ctx);
 
-  // description must be of length less than 176
-  const input: RouterInputs["deck"]["updateDescription"] = {
-    id: 1,
-    description: "kzrtrSYNW2TrAjMyiyYMSJpLCRg0AJiDrxiT90iE4r08haAEhaqGttKk9UFgiDx8rdiyXpmH1htfE2Vyg1kvdLUAEjzbi1J4Ly6UpUpgfQRaxZncEByjafLha6NkMwPHqvawiHRECHmxCAAR45Na05AQC4WUD5R6w4gp6JFfTGWdeGz1"
-  };
-  await expect(caller.deck.updateDescription(input)).rejects.toThrowError();
+    const input: RouterInputs["deck"]["get"] = {
+      publicId: "abcdef123456",
+    };
+
+    const error = new TRPCError({ code: "UNAUTHORIZED" });
+  
+    await expect(caller.deck.get(input)).rejects.toThrow(error);
+  });
+
+  test("public deck id must be nonempty string", async () => {
+    const ctx = createInnerTRPCContext({ headers: new Headers, userId: "valid user id" });
+    const caller = appRouter.createCaller(ctx);
+
+    const input: RouterInputs["deck"]["get"] = {
+      publicId: "",
+    };
+
+    const error = new ZodError([
+      {
+        code: "too_small",
+        minimum: 1,
+        type: "string",
+        inclusive: true,
+        exact: false,
+        message: "String must contain at least 1 character(s)",
+        path: ["publicId"],
+      }
+    ]);
+  
+    await expect(caller.deck.get(input)).rejects.toThrow(error);
+  });
+
+  test("public deck id must not be only whitespace", async () => {
+    const ctx = createInnerTRPCContext({ headers: new Headers, userId: "valid user id" });
+    const caller = appRouter.createCaller(ctx);
+
+    const input: RouterInputs["deck"]["get"] = {
+      publicId: "   ",
+    };
+
+    const error = new ZodError([
+      {
+        code: "too_small",
+        minimum: 1,
+        type: "string",
+        inclusive: true,
+        exact: false,
+        message: "String must contain at least 1 character(s)",
+        path: ["publicId"],
+      }
+    ]);
+  
+    await expect(caller.deck.get(input)).rejects.toThrow(error);
+  });
+
 });
 
-it("user must provide a valid deck ID to delete a deck", async () => {
-  const ctx = createInnerTRPCContext({ headers: new Headers, userId: "test user id" });
-  const caller = appRouter.createCaller(ctx);
+describe("update deck", () => {
 
-  await expect(caller.deck.delete({ id: 3.145 })).rejects.toThrowError(); // must be integer
-  await expect(caller.deck.delete({ id: 0 })).rejects.toThrowError();  // must be greater than zero
-  await expect(caller.deck.delete({ id: -5 })).rejects.toThrowError();  // must be positive
-  await expect(caller.deck.delete({ id: Infinity })).rejects.toThrowError();  // must be finite
+  test("unauthorized user should not be able to update a deck", async () => {
+    const ctx = createInnerTRPCContext({ headers: new Headers, userId: null });
+    const caller = appRouter.createCaller(ctx);
+  
+    const input: RouterInputs["deck"]["update"] = {
+      id: 1,
+      title: "valid deck title",
+      description: "valid deck description",
+      cards: new Array<{ id?: number, front: string, back: string }>(MIN_DECK_SIZE).fill({
+        front: "valid card front",
+        back: "valid card back"
+      }),
+    };
+
+    const error = new TRPCError({ code: "UNAUTHORIZED" });
+  
+    await expect(caller.deck.update(input)).rejects.toThrow(error);
+  });
+
+  test("deck id must be an integer", async () => {
+    const ctx = createInnerTRPCContext({ headers: new Headers, userId: "valid user id" });
+    const caller = appRouter.createCaller(ctx);
+
+    const input: RouterInputs["deck"]["update"] = {
+      id: 3.14159,
+      title: "valid deck title",
+      description: "valid deck description",
+      cards: new Array<{ id?: number, front: string, back: string }>(MIN_DECK_SIZE).fill({
+        front: "valid card front",
+        back: "valid card back"
+      }),
+    };
+
+    const error = new ZodError([
+      {
+        code: "invalid_type",
+        expected: "integer",
+        received: "float",
+        message: "Expected integer, received float",
+        path: ["id"],
+      }
+    ]);
+  
+    await expect(caller.deck.update(input)).rejects.toThrow(error);
+  });
+  
+  test("deck id must be a positive nonzero number", async () => {
+    const ctx = createInnerTRPCContext({ headers: new Headers, userId: "valid user id" });
+    const caller = appRouter.createCaller(ctx);
+    
+    const error = new ZodError([
+      {
+        code: "too_small",
+        minimum: 0,
+        type: "number",
+        inclusive: false,
+        exact: false,
+        message: "Number must be greater than 0",
+        path: ["id"],
+      }
+    ]);
+
+    const zeroInput: RouterInputs["deck"]["update"] = {
+      id: 0,
+      title: "valid deck title",
+      description: "valid deck description",
+      cards: new Array<{ id?: number, front: string, back: string }>(MIN_DECK_SIZE).fill({
+        front: "valid card front",
+        back: "valid card back"
+      }),
+    };
+
+    const negativeInput: RouterInputs["deck"]["update"] = {
+      id: -1,
+      title: "valid deck title",
+      description: "valid deck description",
+      cards: new Array<{ id?: number, front: string, back: string }>(MIN_DECK_SIZE).fill({
+        front: "valid card front",
+        back: "valid card back"
+      }),
+    };
+  
+    await expect(caller.deck.update(zeroInput)).rejects.toThrow(error);
+    await expect(caller.deck.update(negativeInput)).rejects.toThrow(error);
+  });
+
+  test("deck id must be a finite number", async () => {
+    const ctx = createInnerTRPCContext({ headers: new Headers, userId: "valid user id" });
+    const caller = appRouter.createCaller(ctx);
+
+    const input: RouterInputs["deck"]["update"] = {
+      id: Infinity,
+      title: "valid deck title",
+      description: "valid deck description",
+      cards: new Array<{ id?: number, front: string, back: string }>(MIN_DECK_SIZE).fill({
+        front: "valid card front",
+        back: "valid card back"
+      }),
+    };
+
+    const error = new ZodError([
+      {
+        code: "invalid_type",
+        expected: "integer",
+        received: "float",
+        message: "Expected integer, received float",
+        path: ["id"],
+      },
+      {
+        code: "not_finite",
+        message: "Number must be finite",
+        path: ["id"],
+      }
+    ]);
+  
+    await expect(caller.deck.update(input)).rejects.toThrow(error);
+  });
+
+  test(`deck title must exceed ${MIN_DECK_TITLE_LENGTH} characters`, async () => {
+    const ctx = createInnerTRPCContext({ headers: new Headers, userId: "valid user id" });
+    const caller = appRouter.createCaller(ctx);
+  
+    const input: RouterInputs["deck"]["update"] = {
+      id: 1,
+      title: "x".repeat(MIN_DECK_TITLE_LENGTH - 1),
+      description: "valid deck description",
+      cards: new Array<{ id?: number, front: string, back: string }>(MIN_DECK_SIZE).fill({
+        front: "valid card front",
+        back: "valid card back"
+      }),
+    };
+
+    const error = new ZodError([
+      {
+        code: "too_small",
+        minimum: MIN_DECK_TITLE_LENGTH,
+        type: "string",
+        inclusive: true,
+        exact: false,
+        message: `The title of a deck must exceed ${MIN_DECK_TITLE_LENGTH} characters!`,
+        path: ["title"],
+      }
+    ]);
+  
+    await expect(caller.deck.update(input)).rejects.toThrow(error);
+  });
+
+  test(`deck title can't exceed ${MAX_DECK_TITLE_LENGTH} characters`, async () => {
+    const ctx = createInnerTRPCContext({ headers: new Headers, userId: "valid user id" });
+    const caller = appRouter.createCaller(ctx);
+  
+    const input: RouterInputs["deck"]["update"] = {
+      id: 1,
+      title: "x".repeat(MAX_DECK_TITLE_LENGTH + 1),
+      description: "valid deck description",
+      cards: new Array<{ id?: number, front: string, back: string }>(MIN_DECK_SIZE).fill({
+        front: "valid card front",
+        back: "valid card back"
+      }),
+    };
+
+    const error = new ZodError([
+      {
+        code: "too_big",
+        maximum: MAX_DECK_TITLE_LENGTH,
+        type: "string",
+        inclusive: true,
+        exact: false,
+        message: `The title of a deck can't exceed ${MAX_DECK_TITLE_LENGTH} characters!`,
+        path: ["title"],
+      }
+    ]);
+  
+    await expect(caller.deck.update(input)).rejects.toThrow(error);
+  });
+
+  test(`deck description must exceed ${MIN_DECK_DESCRIPTION_LENGTH} characters`, async () => {
+    const ctx = createInnerTRPCContext({ headers: new Headers, userId: "valid user id" });
+    const caller = appRouter.createCaller(ctx);
+  
+    const input: RouterInputs["deck"]["update"] = {
+      id: 1,
+      title: "valid deck title",
+      description: "x".repeat(MIN_DECK_DESCRIPTION_LENGTH - 1),
+      cards: new Array<{ id?: number, front: string, back: string }>(MIN_DECK_SIZE).fill({
+        front: "valid card front",
+        back: "valid card back"
+      }),
+    };
+
+    const error = new ZodError([
+      {
+        code: "too_small",
+        minimum: MIN_DECK_DESCRIPTION_LENGTH,
+        type: "string",
+        inclusive: true,
+        exact: false,
+        message: `The description of a deck must exceed ${MIN_DECK_DESCRIPTION_LENGTH} characters!`,
+        path: ["description"],
+      }
+    ]);
+  
+    await expect(caller.deck.update(input)).rejects.toThrow(error);
+  });
+
+  test(`deck description can't exceed ${MAX_DECK_DESCRIPTION_LENGTH} characters`, async () => {
+    const ctx = createInnerTRPCContext({ headers: new Headers, userId: "valid user id" });
+    const caller = appRouter.createCaller(ctx);
+  
+    const input: RouterInputs["deck"]["update"] = {
+      id: 1,
+      title: "valid deck title",
+      description: "x".repeat(MAX_DECK_DESCRIPTION_LENGTH + 1),
+      cards: new Array<{ id?: number, front: string, back: string }>(MIN_DECK_SIZE).fill({
+        front: "valid card front",
+        back: "valid card back"
+      }),
+    };
+
+    const error = new ZodError([
+      {
+        code: "too_big",
+        maximum: MAX_DECK_DESCRIPTION_LENGTH,
+        type: "string",
+        inclusive: true,
+        exact: false,
+        message: `The description of a deck can't exceed ${MAX_DECK_DESCRIPTION_LENGTH} characters!`,
+        path: ["description"],
+      }
+    ]);
+  
+    await expect(caller.deck.update(input)).rejects.toThrow(error);
+  });
+
+  test(`deck must have at least ${MIN_DECK_SIZE} cards`, async () => {
+    const ctx = createInnerTRPCContext({ headers: new Headers, userId: "valid user id" });
+    const caller = appRouter.createCaller(ctx);
+  
+    const input: RouterInputs["deck"]["update"] = {
+      id: 1,
+      title: "valid deck title",
+      description: "valid deck description",
+      cards: new Array<{ id?: number, front: string, back: string }>(MIN_DECK_SIZE - 1).fill({
+        front: "valid card front",
+        back: "valid card back"
+      }),
+    };
+
+    const error = new ZodError([
+      {
+        code: "too_small",
+        minimum: MIN_DECK_SIZE,
+        type: "array",
+        inclusive: true,
+        exact: false,
+        message: `A deck must have at least ${MIN_DECK_SIZE} cards!`,
+        path: ["cards"],
+      }
+    ]);
+  
+    await expect(caller.deck.update(input)).rejects.toThrow(error);
+  });
+
+  test("card id must be an integer", async () => {
+    const ctx = createInnerTRPCContext({ headers: new Headers, userId: "valid user id" });
+    const caller = appRouter.createCaller(ctx);
+
+    const input: RouterInputs["deck"]["update"] = {
+      id: 1,
+      title: "valid deck title",
+      description: "valid deck description",
+      cards: [
+        { front: "valid card front", back: "valid card back" },
+        { id: 3.14159, front: "valid card front", back: "valid card back" },
+        { id: undefined, front: "valid card front", back: "valid card back" },
+      ],
+    };
+
+    const error = new ZodError([
+      {
+        code: "invalid_type",
+        expected: "integer",
+        received: "float",
+        message: "Expected integer, received float",
+        path: ["cards", 1, "id"],
+      }
+    ]);
+  
+    await expect(caller.deck.update(input)).rejects.toThrow(error);
+  });
+  
+  test("card id must be a positive nonzero number", async () => {
+    const ctx = createInnerTRPCContext({ headers: new Headers, userId: "valid user id" });
+    const caller = appRouter.createCaller(ctx);
+    
+    const error = new ZodError([
+      {
+        code: "too_small",
+        minimum: 0,
+        type: "number",
+        inclusive: false,
+        exact: false,
+        message: "Number must be greater than 0",
+        path: ["cards", 1, "id"],
+      }
+    ]);
+
+    const zeroInput: RouterInputs["deck"]["update"] = {
+      id: 1,
+      title: "valid deck title",
+      description: "valid deck description",
+      cards: [
+        { front: "valid card front", back: "valid card back" },
+        { id: 0, front: "valid card front", back: "valid card back" },
+        { id: undefined, front: "valid card front", back: "valid card back" },
+      ],
+    };
+
+    const negativeInput: RouterInputs["deck"]["update"] = {
+      id: 1,
+      title: "valid deck title",
+      description: "valid deck description",
+      cards: [
+        { front: "valid card front", back: "valid card back" },
+        { id: -1, front: "valid card front", back: "valid card back" },
+        { id: undefined, front: "valid card front", back: "valid card back" },
+      ],
+    };
+  
+    await expect(caller.deck.update(zeroInput)).rejects.toThrow(error);
+    await expect(caller.deck.update(negativeInput)).rejects.toThrow(error);
+  });
+
+  test("card id must be a finite number", async () => {
+    const ctx = createInnerTRPCContext({ headers: new Headers, userId: "valid user id" });
+    const caller = appRouter.createCaller(ctx);
+
+    const input: RouterInputs["deck"]["update"] = {
+      id: 1,
+      title: "valid deck title",
+      description: "valid deck description",
+      cards: [
+        { front: "valid card front", back: "valid card back" },
+        { id: Infinity, front: "valid card front", back: "valid card back" },
+        { id: undefined, front: "valid card front", back: "valid card back" },
+      ],
+    };
+
+    const error = new ZodError([
+      {
+        code: "invalid_type",
+        expected: "integer",
+        received: "float",
+        message: "Expected integer, received float",
+        path: ["cards", 1, "id"],
+      },
+      {
+        code: "not_finite",
+        message: "Number must be finite",
+        path: ["cards", 1, "id"],
+      }
+    ]);
+  
+    await expect(caller.deck.update(input)).rejects.toThrow(error);
+  });
+
+  test(`card front string must exceed ${MIN_CARD_FRONT_LENGTH} characters`, async () => {
+    const ctx = createInnerTRPCContext({ headers: new Headers, userId: "valid user id" });
+    const caller = appRouter.createCaller(ctx);
+  
+    const input: RouterInputs["deck"]["update"] = {
+      id: 1,
+      title: "valid deck title",
+      description: "valid deck description",
+      cards: [
+        { front: "valid card front", back: "valid card back" },
+        { front: "x".repeat(MIN_CARD_FRONT_LENGTH - 1), back: "valid card back" },
+        { front: "valid card front", back: "valid card back" },
+      ],
+    };
+
+    const error = new ZodError([
+      {
+        code: "too_small",
+        minimum: MIN_CARD_FRONT_LENGTH,
+        type: "string",
+        inclusive: true,
+        exact: false,
+        message: `The front of a flashcard must exceed ${MIN_CARD_FRONT_LENGTH} characters!`,
+        path: ["cards", 1, "front"],
+      }
+    ]);
+  
+    await expect(caller.deck.update(input)).rejects.toThrow(error);
+  });
+  
+  test(`card front string can't exceed ${MAX_CARD_FRONT_LENGTH} characters`, async () => {
+    const ctx = createInnerTRPCContext({ headers: new Headers, userId: "valid user id" });
+    const caller = appRouter.createCaller(ctx);
+  
+    const input: RouterInputs["deck"]["update"] = {
+      id: 1,
+      title: "valid deck title",
+      description: "valid deck description",
+      cards: [
+        { front: "valid card front", back: "valid card back" },
+        { front: "x".repeat(MAX_CARD_FRONT_LENGTH + 1), back: "valid card back" },
+        { front: "valid card front", back: "valid card back" },
+      ],
+    };
+
+    const error = new ZodError([
+      {
+        code: "too_big",
+        maximum: MAX_CARD_FRONT_LENGTH,
+        type: "string",
+        inclusive: true,
+        exact: false,
+        message: `The front of a flashcard can't exceed ${MAX_CARD_FRONT_LENGTH} characters!`,
+        path: ["cards", 1, "front"],
+      }
+    ]);
+  
+    await expect(caller.deck.update(input)).rejects.toThrow(error);
+  });
+  
+  test(`card back string must exceed ${MIN_CARD_BACK_LENGTH} characters`, async () => {
+    const ctx = createInnerTRPCContext({ headers: new Headers, userId: "valid user id" });
+    const caller = appRouter.createCaller(ctx);
+  
+    const input: RouterInputs["deck"]["update"] = {
+      id: 1,
+      title: "valid deck title",
+      description: "valid deck description",
+      cards: [
+        { front: "valid card front", back: "valid card back" },
+        { front: "valid card front", back: "x".repeat(MIN_CARD_BACK_LENGTH - 1) },
+        { front: "valid card front", back: "valid card back" },
+      ],
+    };
+
+    const error = new ZodError([
+      {
+        code: "too_small",
+        minimum: MIN_CARD_BACK_LENGTH,
+        type: "string",
+        inclusive: true,
+        exact: false,
+        message: `The back of a flashcard must exceed ${MIN_CARD_BACK_LENGTH} characters!`,
+        path: ["cards", 1, "back"],
+      }
+    ]);
+  
+    await expect(caller.deck.update(input)).rejects.toThrow(error);
+  });
+  
+  test(`card back string can't exceed ${MAX_CARD_BACK_LENGTH} characters`, async () => {
+    const ctx = createInnerTRPCContext({ headers: new Headers, userId: "valid user id" });
+    const caller = appRouter.createCaller(ctx);
+  
+    const input: RouterInputs["deck"]["update"] = {
+      id: 1,
+      title: "valid deck title",
+      description: "valid deck description",
+      cards: [
+        { front: "valid card front", back: "valid card back" },
+        { front: "valid card front", back: "x".repeat(MAX_CARD_BACK_LENGTH + 1) },
+        { front: "valid card front", back: "valid card back" },
+      ],
+    };
+
+    const error = new ZodError([
+      {
+        code: "too_big",
+        maximum: MAX_CARD_BACK_LENGTH,
+        type: "string",
+        inclusive: true,
+        exact: false,
+        message: `The back of a flashcard can't exceed ${MAX_CARD_BACK_LENGTH} characters!`,
+        path: ["cards", 1, "back"],
+      }
+    ]);
+  
+    await expect(caller.deck.update(input)).rejects.toThrow(error);
+  });
+
+});
+
+describe("delete deck", () => {
+
+  test("unauthorized user should not be able to delete a deck", async () => {
+    const ctx = createInnerTRPCContext({ headers: new Headers, userId: null });
+    const caller = appRouter.createCaller(ctx);
+
+    const error = new TRPCError({ code: "UNAUTHORIZED" });
+  
+    await expect(caller.deck.delete({ id: 1 })).rejects.toThrow(error);
+  });
+
+  test("deck id must be an integer", async () => {
+    const ctx = createInnerTRPCContext({ headers: new Headers, userId: "valid user id" });
+    const caller = appRouter.createCaller(ctx);
+
+    const error = new ZodError([
+      {
+        code: "invalid_type",
+        expected: "integer",
+        received: "float",
+        message: "Expected integer, received float",
+        path: ["id"],
+      }
+    ]);
+  
+    await expect(caller.deck.delete({ id: 3.14159 })).rejects.toThrow(error);
+  });
+  
+  test("deck id must be a positive nonzero number", async () => {
+    const ctx = createInnerTRPCContext({ headers: new Headers, userId: "valid user id" });
+    const caller = appRouter.createCaller(ctx);
+    
+    const error = new ZodError([
+      {
+        code: "too_small",
+        minimum: 0,
+        type: "number",
+        inclusive: false,
+        exact: false,
+        message: "Number must be greater than 0",
+        path: ["id"],
+      }
+    ]);
+  
+    await expect(caller.deck.delete({ id: 0 })).rejects.toThrow(error);
+    await expect(caller.deck.delete({ id: -1 })).rejects.toThrow(error);
+  });
+
+  test("deck id must be a finite number", async () => {
+    const ctx = createInnerTRPCContext({ headers: new Headers, userId: "valid user id" });
+    const caller = appRouter.createCaller(ctx);
+
+    const error = new ZodError([
+      {
+        code: "invalid_type",
+        expected: "integer",
+        received: "float",
+        message: "Expected integer, received float",
+        path: ["id"],
+      },
+      {
+        code: "not_finite",
+        message: "Number must be finite",
+        path: ["id"],
+      }
+    ]);
+  
+    await expect(caller.deck.delete({ id: Infinity })).rejects.toThrow(error);
+  });
+
 });
